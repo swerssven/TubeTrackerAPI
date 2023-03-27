@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
-using TubeTrackAPI.Models;
 using TubeTrackAPI.Repositories;
+using TubeTrackerAPI.Models.Response;
 
 namespace TubeTrackAPI.Services
 {

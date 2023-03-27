@@ -1,4 +1,6 @@
-﻿namespace TubeTrackAPI.Models
+﻿using TubeTrackAPI.Models;
+
+namespace TubeTrackerAPI.Models.Response
 {
     public class MovieResponse
     {
