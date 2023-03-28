@@ -2,11 +2,11 @@
 {
     internal class UserRepository
     {
-        internal async Task<int> GetUserId(string user, string password)
+        internal async Task<int> GetUserId(string username, string password)
         {
             int result = 0;
 
-            if (user == "caca")
+            if (username == "caca")
             {
                 result = 1;
             }
