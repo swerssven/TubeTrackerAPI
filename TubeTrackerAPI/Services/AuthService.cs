@@ -7,16 +7,19 @@ using TubeTrackerAPI.Models.Enum;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.Repositories;
+using TubeTrackerAPI.TubeTrackerContext;
 
 namespace TubeTrackerAPI.Services
 {
     internal class AuthService
     {
         private readonly IConfiguration _configuration;
+        private readonly TubeTrackerDbContext _dbContext;
 
-        public AuthService(IConfiguration configuration) 
+        public AuthService(IConfiguration configuration, TubeTrackerDbContext dbContext) 
         {
             _configuration = configuration;
+            _dbContext = dbContext;
         }
 
         internal async Task<GetTokenResponse> GetToken(GetTokenRequest request)
@@ -25,14 +28,14 @@ namespace TubeTrackerAPI.Services
 
             try
             {
-                UserRepository userRepository = new UserRepository();
-                int userId = await userRepository.GetUserId(request.Username, request.Password);
+                UserRepository userRepository = new UserRepository(_dbContext);
+                int? userId = await userRepository.GetUserId(request.Username, request.Password);
 
                 response.Status = StatusEnum.UserNotFound;
 
-                if (userId > 0)
+                if (userId != null && userId > 0)
                 {
-                    response.Token = this.Authenticate(userId);
+                    response.Token = this.Authenticate((int)userId);
                     response.Status = StatusEnum.Ok;
                 }
             }

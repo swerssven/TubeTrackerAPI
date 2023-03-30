@@ -1,4 +1,4 @@
-﻿using TubeTrackAPI.Models;
+﻿using TubeTrackerAPI.Models;
 
 namespace TubeTrackerAPI.Models.Response
 {

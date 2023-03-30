@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
-using TubeTrackAPI.Repositories;
+using TubeTrackerAPI.Repositories;
 using TubeTrackerAPI.Models.Response;
 
-namespace TubeTrackAPI.Services
+namespace TubeTrackerAPI.Services
 {
     public class MovieService
     {

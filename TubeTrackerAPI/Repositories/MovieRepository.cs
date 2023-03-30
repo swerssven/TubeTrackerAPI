@@ -1,9 +1,9 @@
-﻿using TubeTrackAPI.Models;
+﻿using TubeTrackerAPI.Models;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Newtonsoft.Json;
 
-namespace TubeTrackAPI.Repositories
+namespace TubeTrackerAPI.Repositories
 {
     public class MovieRepository
     {

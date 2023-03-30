@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TubeTrackAPI.Services;
+using TubeTrackerAPI.Services;
 using TubeTrackerAPI.Middleware;
 
-namespace TubeTrackAPI.Controllers
+namespace TubeTrackerAPI.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]

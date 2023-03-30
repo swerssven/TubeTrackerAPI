@@ -1,0 +1,1 @@
+﻿Scaffold-DbContext 'Name=ConnectionStrings:Database' Microsoft.EntityFrameworkCore.SqlServer -OutputDir "TubeTrackerEntities" -Context TubeTrackerDbContext -ContextDir "TubeTrackerContext" -force

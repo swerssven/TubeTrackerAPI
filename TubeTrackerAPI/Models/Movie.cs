@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace TubeTrackAPI.Models
+namespace TubeTrackerAPI.Models
 {
     public class Movie
     {

@@ -1,6 +1,7 @@
 
 using Microsoft.OpenApi.Models;
 using TubeTrackerAPI.Middleware;
+using TubeTrackerAPI.TubeTrackerContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,9 @@ builder.Services.AddCors(policyBuilder =>
     policyBuilder.AddDefaultPolicy(policy =>
         policy.WithOrigins("*").AllowAnyHeader().AllowAnyHeader())
 );
+
+// Db context.
+builder.Services.AddDbContext<TubeTrackerDbContext>();
 
 var app = builder.Build();
 
