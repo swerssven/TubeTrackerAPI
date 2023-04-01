@@ -7,7 +7,10 @@
 
         // Estados de error
         UnkownError = -1,
-        UserNotFound = -2,
-
+        NotFound = -2,
+        EmailAlreadyExists = -3,
+        NickNameAlreadyExists = -4,
+        EmailAndNicknameAlreadyExist = -5,
+        UserNotExist = -6
     }
 }

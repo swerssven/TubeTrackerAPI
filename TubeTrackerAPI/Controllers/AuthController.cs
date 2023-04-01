@@ -30,7 +30,7 @@ namespace TubeTrackerAPI.Controllers
             {
                 return Ok(response.Token);
             }
-            else if(response.Status == StatusEnum.UserNotFound)
+            else if(response.Status == StatusEnum.NotFound)
             {
                 return Unauthorized();
             }

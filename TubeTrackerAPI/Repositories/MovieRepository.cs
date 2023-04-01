@@ -13,7 +13,7 @@ namespace TubeTrackerAPI.Repositories
         public async Task<string> GetMovieSearchList(string filter, int page)
         {
             string apiURL = $"/search/movie?api_key={apiKey}&language=en-US&query={filter}&page={page}&include_adult=false";
-            List<Movie> movieList = new List<Movie>();
+            List<ExternalMovie> movieList = new List<ExternalMovie>();
 
             using (var client = new HttpClient())
             {

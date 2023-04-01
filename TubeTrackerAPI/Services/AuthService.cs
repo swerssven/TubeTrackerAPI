@@ -29,9 +29,9 @@ namespace TubeTrackerAPI.Services
             try
             {
                 UserRepository userRepository = new UserRepository(_dbContext);
-                int? userId = await userRepository.GetUserId(request.Username, request.Password);
+                int? userId = await userRepository.GetUserId(request.Email, request.Password);
 
-                response.Status = StatusEnum.UserNotFound;
+                response.Status = StatusEnum.NotFound;
 
                 if (userId != null && userId > 0)
                 {

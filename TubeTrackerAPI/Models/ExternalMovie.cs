@@ -2,11 +2,12 @@
 
 namespace TubeTrackerAPI.Models
 {
-    public class Movie
+    public class ExternalMovie
     {
         public bool Adult { get; set; }
-        [JsonProperty("backdrop_path")]
-        public string BackdropPath { get; set; }
+        // [JsonProperty("backdrop_path")]
+        // public string BackdropPath { get; set; }
+        public string backdrop_path { get; set; }
         public List<int> genre_ids { get; set; }
         public int id { get; set; }
         public string original_language { get; set; }
