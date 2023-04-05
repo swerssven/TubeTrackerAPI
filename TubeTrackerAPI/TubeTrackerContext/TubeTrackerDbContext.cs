@@ -131,21 +131,35 @@ public partial class TubeTrackerDbContext : DbContext
             entity.Property(e => e.Backdrop)
                 .HasMaxLength(255)
                 .IsUnicode(false);
-            entity.Property(e => e.Description).IsUnicode(false);
+            entity.Property(e => e.DescriptionEn)
+                .IsUnicode(false)
+                .HasColumnName("DescriptionEN");
+            entity.Property(e => e.DescriptionEs)
+                .IsUnicode(false)
+                .HasColumnName("DescriptionES");
             entity.Property(e => e.Directors)
                 .HasMaxLength(255)
                 .IsUnicode(false);
-            entity.Property(e => e.Genres)
+            entity.Property(e => e.GenresEn)
                 .HasMaxLength(255)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("GenresEN");
+            entity.Property(e => e.GenresEs)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("GenresES");
             entity.Property(e => e.Poster)
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.PremiereDate).HasColumnType("date");
-            entity.Property(e => e.Title)
-                .IsRequired()
+            entity.Property(e => e.TitleEn)
                 .HasMaxLength(255)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("TitleEN");
+            entity.Property(e => e.TitleEs)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("TitleES");
             entity.Property(e => e.Trailer)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -184,12 +198,23 @@ public partial class TubeTrackerDbContext : DbContext
         {
             entity.HasKey(e => e.NewsId).HasName("PK_News_NewsId");
 
-            entity.Property(e => e.Content).IsRequired();
+            entity.Property(e => e.ContentEn)
+                .IsRequired()
+                .HasColumnName("ContentEN");
+            entity.Property(e => e.ContentEs)
+                .IsRequired()
+                .HasColumnName("ContentES");
             entity.Property(e => e.CreationDate).HasColumnType("datetime");
-            entity.Property(e => e.Title)
+            entity.Property(e => e.TitleEn)
                 .IsRequired()
                 .HasMaxLength(255)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("TitleEN");
+            entity.Property(e => e.TitleEs)
+                .IsRequired()
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("TitleES");
 
             entity.HasOne(d => d.User).WithMany(p => p.News)
                 .HasForeignKey(d => d.UserId)
@@ -249,10 +274,14 @@ public partial class TubeTrackerDbContext : DbContext
             entity.HasIndex(e => new { e.SerieId, e.NumSeason, e.NumEpisode }, "UK_SeasonsEpisodes_SerieId_NumSeason_NumEpisode").IsUnique();
 
             entity.Property(e => e.PremiereDate).HasColumnType("date");
-            entity.Property(e => e.TitleEpisode)
-                .IsRequired()
+            entity.Property(e => e.TitleEpisodeEn)
                 .HasMaxLength(255)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("TitleEpisodeEN");
+            entity.Property(e => e.TitleEpisodeEs)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("TitleEpisodeES");
 
             entity.HasOne(d => d.Serie).WithMany(p => p.SeasonsEpisodes)
                 .HasForeignKey(d => d.SerieId)
@@ -303,18 +332,32 @@ public partial class TubeTrackerDbContext : DbContext
             entity.Property(e => e.Creators)
                 .HasMaxLength(255)
                 .IsUnicode(false);
-            entity.Property(e => e.Description).IsUnicode(false);
-            entity.Property(e => e.Genres)
+            entity.Property(e => e.DescriptionEn)
+                .IsUnicode(false)
+                .HasColumnName("DescriptionEN");
+            entity.Property(e => e.DescriptionEs)
+                .IsUnicode(false)
+                .HasColumnName("DescriptionES");
+            entity.Property(e => e.GenresEn)
                 .HasMaxLength(255)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("GenresEN");
+            entity.Property(e => e.GenresEs)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("GenresES");
             entity.Property(e => e.Poster)
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.PremiereDate).HasColumnType("date");
-            entity.Property(e => e.Title)
-                .IsRequired()
+            entity.Property(e => e.TitleEn)
                 .HasMaxLength(255)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("TitleEN");
+            entity.Property(e => e.TitleEs)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("TitleES");
             entity.Property(e => e.Trailer)
                 .HasMaxLength(255)
                 .IsUnicode(false);

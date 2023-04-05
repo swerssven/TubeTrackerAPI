@@ -2,6 +2,11 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Newtonsoft.Json;
+using TubeTrackerAPI.TubeTrackerContext;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TubeTrackerAPI.TubeTrackerEntities;
+using Microsoft.EntityFrameworkCore;
+using TubeTrackerAPI.Services;
 
 namespace TubeTrackerAPI.Repositories
 {
@@ -9,11 +14,19 @@ namespace TubeTrackerAPI.Repositories
     {
         private const string URL = "https://api.themoviedb.org/3";
         private const string apiKey = "7d22105ae1b958ce88fe42db67a97318";
+        private readonly TubeTrackerDbContext _dbContext;
 
-        public async Task<string> GetMovieSearchList(string filter, int page)
+        public MovieRepository(TubeTrackerDbContext dbContext) 
         {
-            string apiURL = $"/search/movie?api_key={apiKey}&language=en-US&query={filter}&page={page}&include_adult=false";
-            List<ExternalMovie> movieList = new List<ExternalMovie>();
+            this._dbContext = dbContext;
+        }
+
+
+        // Gets a list of movie with the necesary information from external API to make movie-cards
+        public async Task<string> GetMovieSearchList(string filter, int page, string language)
+        {
+            string apiURL = $"/search/movie?api_key={apiKey}&language={language}&query={filter}&page={page}&include_adult=false";
+            //List<ExternalMovie> movieList = new List<ExternalMovie>();
 
             using (var client = new HttpClient())
             {
@@ -30,5 +43,72 @@ namespace TubeTrackerAPI.Repositories
                 }
             }
         }
+
+        // Create new movie in data base
+        public async Task<Movie> CreateMovie(Movie movie)
+        {
+            var MovieQuery = await _dbContext.Movies.Where(m => m.MovieApiId == movie.MovieApiId).FirstOrDefaultAsync();
+            //var MovieQuery = (from m in _dbContext.Movies where m.MovieApiId == movie.MovieApiId select m).FirstOrDefault();
+            
+            if (MovieQuery == null)
+            {
+                _dbContext.Movies.Add(movie);
+                await _dbContext.SaveChangesAsync();
+                MovieQuery = movie;
+            }
+            else if (MovieQuery.TitleEn == null && movie.TitleEn != null)
+            {
+                MovieQuery.TitleEn = movie.TitleEn;
+                MovieQuery.DescriptionEn = movie.DescriptionEn;
+                MovieQuery.GenresEn = movie.GenresEn;
+                _dbContext.Movies.Update(MovieQuery);
+                await _dbContext.SaveChangesAsync();
+            }
+            else if (MovieQuery.TitleEs == null && movie.TitleEs != null)
+            {
+                MovieQuery.TitleEs = movie.TitleEs;
+                MovieQuery.DescriptionEs = movie.DescriptionEs;
+                MovieQuery.GenresEs = movie.GenresEs;
+                _dbContext.Movies.Update(MovieQuery);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return MovieQuery;
+
+        }
+
+        // Gets a movie from external API
+        public async Task<string> GetMovieExternal(int id, string language)
+        {
+            string apiURL = $"/movie/{id}?api_key={apiKey}&language={language}&append_to_response=videos,credits";
+
+            using (var client = new HttpClient())
+            {
+                using (var response = await client.GetAsync(URL + apiURL))
+                {
+                    string apiResponse = string.Empty;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        apiResponse = await response.Content.ReadAsStringAsync();
+                    }
+
+                    return apiResponse;
+                }
+            }
+        }
+
+        // Gets a movie from data base
+        /*public async Task<Movie> GetMovie(int id)
+        {
+            var MovieQuery = (from m in _dbContext.Movies where m.MovieApiId == id select m).FirstOrDefault();
+            
+            if(MovieQuery != null)
+            {
+                return MovieQuery;
+            }
+
+            return null;
+        }*/
     }
 }

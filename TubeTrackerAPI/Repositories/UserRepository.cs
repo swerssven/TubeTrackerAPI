@@ -1,6 +1,6 @@
 ﻿using MessagePack.Formatters;
 using Microsoft.EntityFrameworkCore;
-using TubeTrackerAPI.Models.Response;
+using TubeTrackerAPI.Models;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
 
@@ -29,10 +29,10 @@ namespace TubeTrackerAPI.Repositories
             return result;
         }
 
-        internal async Task<UserResponse> GetUser(int id)
+        internal async Task<UserDto> GetUser(int id)
         {
             User user = await _dbContext.Users.FindAsync(id);
-            UserResponse userResponse = new UserResponse();
+            UserDto userResponse = new UserDto();
 
             userResponse.UserId = user.UserId;
             userResponse.FirstName = user.FirstName;

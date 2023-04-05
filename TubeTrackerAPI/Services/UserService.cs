@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Azure.Core;
 using Microsoft.EntityFrameworkCore;
+using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
 using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.Repositories;
@@ -17,6 +18,7 @@ namespace TubeTrackerAPI.Services
         {
             _tubeTrackerDbContext = tubeTrackerDbContext;
         }
+
         internal async Task<BaseResponse> CreateUser(User user)
         {
             BaseResponse response = new BaseResponse();
@@ -56,16 +58,16 @@ namespace TubeTrackerAPI.Services
             return response;
         }
 
-        internal async Task<UserResponse> GetUser(int id)
+        internal async Task<UserDto> GetUser(int id)
         {
             BaseResponse response = new BaseResponse();
-            UserResponse userResponse = new UserResponse();
+            UserDto userDto = new UserDto();
             try
             {
                 UserRepository userRepository = new UserRepository(_tubeTrackerDbContext);
-                userResponse = await userRepository.GetUser(id);
+                userDto = await userRepository.GetUser(id);
 
-                if (userResponse != null)
+                if (userDto != null)
                 {
                     response.Status = StatusEnum.Ok;
                 } else
@@ -79,7 +81,7 @@ namespace TubeTrackerAPI.Services
                 response.Message = ex.ToString();
             }
 
-            return userResponse;
+            return userDto;
         }
     }
 }

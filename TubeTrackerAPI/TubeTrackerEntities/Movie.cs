@@ -9,15 +9,21 @@ public partial class Movie
 
     public int MovieApiId { get; set; }
 
-    public string Title { get; set; }
+    public string TitleEn { get; set; }
 
-    public string Description { get; set; }
+    public string TitleEs { get; set; }
+
+    public string DescriptionEn { get; set; }
+
+    public string DescriptionEs { get; set; }
 
     public string Actors { get; set; }
 
     public string Directors { get; set; }
 
-    public string Genres { get; set; }
+    public string GenresEn { get; set; }
+
+    public string GenresEs { get; set; }
 
     public DateTime? PremiereDate { get; set; }
 

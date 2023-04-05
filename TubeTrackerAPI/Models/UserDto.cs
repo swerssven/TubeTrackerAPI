@@ -1,8 +1,8 @@
 ﻿using TubeTrackerAPI.TubeTrackerEntities;
 
-namespace TubeTrackerAPI.Models.Response
+namespace TubeTrackerAPI.Models
 {
-    public class UserResponse
+    public class UserDto
     {
         public int UserId { get; set; }
 

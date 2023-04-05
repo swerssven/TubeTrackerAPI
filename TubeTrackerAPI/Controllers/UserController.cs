@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NuGet.Protocol;
 using TubeTrackerAPI.Middleware;
+using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
 using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.Services;
@@ -35,7 +36,7 @@ namespace TubeTrackerAPI.Controllers
         public async Task<IActionResult> Get([FromRoute]int id)
         {
             UserService userService = new UserService(_tubeTrackerDbContext);
-            UserResponse userResponse = await userService.GetUser(id);
+            UserDto userResponse = await userService.GetUser(id);
 
             return Ok(userResponse);
         }
