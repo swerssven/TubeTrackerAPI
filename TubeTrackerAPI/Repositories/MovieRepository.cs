@@ -1,12 +1,9 @@
-﻿using TubeTrackerAPI.Models;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using Newtonsoft.Json;
-using TubeTrackerAPI.TubeTrackerContext;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
 using Microsoft.EntityFrameworkCore;
-using TubeTrackerAPI.Services;
+using TubeTrackerAPI.Models.Request;
+using TubeTrackerAPI.Models;
+using Azure.Core;
 
 namespace TubeTrackerAPI.Repositories
 {
@@ -47,8 +44,8 @@ namespace TubeTrackerAPI.Repositories
         // Create new movie in data base
         public async Task<Movie> CreateMovie(Movie movie)
         {
-            var MovieQuery = await _dbContext.Movies.Where(m => m.MovieApiId == movie.MovieApiId).FirstOrDefaultAsync();
-            //var MovieQuery = (from m in _dbContext.Movies where m.MovieApiId == movie.MovieApiId select m).FirstOrDefault();
+            var MovieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == movie.MovieApiId).FirstOrDefaultAsync();
+            //MovieQuery = (from m in _dbContext.Movies where m.MovieApiId == movie.MovieApiId select m).FirstOrDefault();
             
             if (MovieQuery == null)
             {
@@ -98,17 +95,59 @@ namespace TubeTrackerAPI.Repositories
             }
         }
 
-        // Gets a movie from data base
-        /*public async Task<Movie> GetMovie(int id)
+        public async Task<IEnumerable<MovieReviewDto>>  GetMovieReviews(int movieApiId)
         {
-            var MovieQuery = (from m in _dbContext.Movies where m.MovieApiId == id select m).FirstOrDefault();
-            
-            if(MovieQuery != null)
+            var movieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == movieApiId).FirstOrDefaultAsync();
+
+            List<MovieReviewDto> movieReviewList = await _dbContext.MovieReviews.Where(m => m.MovieId == movieQuery.MovieId)
+                .Select(m => new MovieReviewDto()
+                {
+                    MovieReviewId = m.MovieReviewId,
+                    Content = m.Content,
+                    UserId = m.UserId,
+                    UserNickname = m.User.Nickname,
+                    UserImage = m.User.Image,
+                    CreationDate = m.CreationDate
+                }).ToListAsync();
+
+            return movieReviewList;
+        }
+
+        public async Task<IEnumerable<MovieReviewDto>> CreateMovieReviewList(CreateMovieReviewListRequest request)
+        {
+            var movieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == request.MovieApiId).FirstOrDefaultAsync();
+            var reviewQuery = movieQuery.MovieReviews.Where(m => m.UserId == request.UserId).FirstOrDefault();
+
+            MovieReview movieReview = new MovieReview();
+            movieReview.Content = request.Content;
+            movieReview.UserId = request.UserId;
+            movieReview.CreationDate = DateTime.UtcNow;
+
+            if (reviewQuery == null && request.Content != null)
             {
-                return MovieQuery;
+                movieReview.MovieId = movieQuery.MovieId;
+                _dbContext.MovieReviews.Add(movieReview);
+                await _dbContext.SaveChangesAsync();
+            } 
+            else if (reviewQuery != null)
+            {
+                reviewQuery.Content = movieReview.Content;
+                reviewQuery.CreationDate = movieReview.CreationDate;
+                _dbContext.MovieReviews.Update(reviewQuery);
+                await _dbContext.SaveChangesAsync();
             }
 
-            return null;
-        }*/
+            List<MovieReviewDto> movieReviewList = await _dbContext.MovieReviews.Where(m => m.MovieId == movieQuery.MovieId)
+                .Select(m => new MovieReviewDto() { 
+                    MovieReviewId = m.MovieReviewId,
+                    Content = m.Content,
+                    UserId = m.UserId,
+                    UserNickname = m.User.Nickname,
+                    UserImage = m.User.Image,
+                    CreationDate = m.CreationDate
+                }).ToListAsync();
+
+            return movieReviewList;
+        }
     }
 }

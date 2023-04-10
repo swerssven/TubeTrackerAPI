@@ -5,6 +5,8 @@ using TubeTrackerAPI.Models;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
 using System.Collections;
+using TubeTrackerAPI.Models.Request;
+using Azure.Core;
 
 namespace TubeTrackerAPI.Services
 {
@@ -26,13 +28,6 @@ namespace TubeTrackerAPI.Services
             return movieResponse;  
         }
 
-        /*public Task<Movie> GetMovie(int id)
-        {
-            MovieRepository movieRepository = new MovieRepository(this._dbContext);
-
-            return movieRepository.GetMovie(id);
-        }*/
-
         public async Task<Movie> CreateMovie(int id, string language)
         {
 
@@ -43,21 +38,21 @@ namespace TubeTrackerAPI.Services
 
             string trailer = externalMovieDetailsResponse.videos.results.Where(t => t.type == "Trailer").FirstOrDefault()?.key;
 
-            List<Cast> cast = externalMovieDetailsResponse.credits.cast.Where(c => c.known_for_department == "Acting").ToList();
+            List<MovieCast> cast = externalMovieDetailsResponse.credits.cast.Where(c => c.known_for_department == "Acting").ToList();
             string actors = null;
             if(cast != null)
             {
                 actors = string.Join(", ", cast.Select(c => c.name).Take(20).ToList());
             }
 
-            List<Crew> crew = externalMovieDetailsResponse.credits.crew.Where(c => c.job == "Director").ToList();
+            List<MovieCrew> crew = externalMovieDetailsResponse.credits.crew.Where(c => c.job == "Director").ToList();
             string directors = null;
             if (crew != null)
             {
                 directors = string.Join(", ", crew.Select(c => c.name).Take(20).ToList());
             }
 
-            List<Genre> genreList = externalMovieDetailsResponse.genres.ToList();
+            List<MovieGenre> genreList = externalMovieDetailsResponse.genres.ToList();
             string genres = null;
             if (genreList != null)
             {
@@ -89,6 +84,24 @@ namespace TubeTrackerAPI.Services
             }
 
             return await movieRepository.CreateMovie(movie); 
+        }
+
+        public async Task<IEnumerable<MovieReviewDto>> GetMovieReviews(int movieApiId)
+        {
+            MovieRepository movieRepository = new MovieRepository(_dbContext);
+
+            IEnumerable<MovieReviewDto> movieReviewResponse = await movieRepository.GetMovieReviews(movieApiId);
+
+            return movieReviewResponse;
+        }
+        
+        public async Task<IEnumerable<MovieReviewDto>> CreateMovieReviewList(CreateMovieReviewListRequest request)
+        {
+            MovieRepository movieRepository = new MovieRepository(_dbContext);
+
+            IEnumerable<MovieReviewDto> movieReviewResponse = await movieRepository.CreateMovieReviewList(request);
+
+            return movieReviewResponse;
         }
     }
 }

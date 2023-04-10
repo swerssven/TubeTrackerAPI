@@ -1,7 +1,9 @@
 
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 using TubeTrackerAPI.Middleware;
 using TubeTrackerAPI.TubeTrackerContext;
+using TubeTrackerAPI.TubeTrackerEntities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,12 +56,18 @@ builder.Services.AddCors(policyBuilder =>
 // Db context.
 builder.Services.AddDbContext<TubeTrackerDbContext>();
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.WriteIndented = true;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
-    app.UseSwagger();
+app.UseSwagger();
     app.UseSwaggerUI();
 //}
 

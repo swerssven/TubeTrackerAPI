@@ -1,6 +1,6 @@
 ﻿namespace TubeTrackerAPI.Models
 {
-    public class Genre
+    public class MovieGenre
     {
         //public int id { get; set; }
         public string name { get; set; }
@@ -12,7 +12,7 @@
         public string backdrop_path { get; set; }
         //public object belongs_to_collection { get; set; }
         //public int budget { get; set; }
-        public List<Genre> genres { get; set; }
+        public List<MovieGenre> genres { get; set; }
         //public string homepage { get; set; }
         public int id { get; set; }
         //public string imdb_id { get; set; }
@@ -33,17 +33,17 @@
         //public bool video { get; set; }
         //public double vote_average { get; set; }
         //public int vote_count { get; set; }
-        public Videos videos { get; set; }
-        public Credits credits { get; set; }
+        public MovieVideos videos { get; set; }
+        public MovieCredits credits { get; set; }
     }
 
-    public class Credits
+    public class MovieCredits
     {
-        public List<Cast> cast { get; set; }
-        public List<Crew> crew { get; set; }
+        public List<MovieCast> cast { get; set; }
+        public List<MovieCrew> crew { get; set; }
     }
 
-    public class Cast
+    public class MovieCast
     {
         //public bool adult { get; set; }
         //public int gender { get; set; }
@@ -59,7 +59,7 @@
         //public int order { get; set; }
     }
 
-    public class Crew
+    public class MovieCrew
     {
         //public bool adult { get; set; }
         //public int gender { get; set; }
@@ -74,12 +74,12 @@
         public string job { get; set; }
     }
 
-    public class Videos
+    public class MovieVideos
     {
-        public List<Result> results { get; set; }
+        public List<MovieResult> results { get; set; }
     }
 
-    public class Result
+    public class MovieResult
     {
         //public string iso_639_1 { get; set; }
         //public string iso_3166_1 { get; set; }
