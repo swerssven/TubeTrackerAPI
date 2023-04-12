@@ -40,7 +40,7 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await movieService.CreateMovie(id, language));
         }
 
-        // GET api/<MovieController>?id=5
+        // GET api/<MovieController>/getReviews?movieApiId=5
         [Route("getReviews")]
         [HttpGet]
         public async Task<IActionResult> GetReviewsAsync([FromQuery] int movieApiId)
@@ -50,6 +50,7 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await movieService.GetMovieReviews(movieApiId));
         }
 
+        // POST api/<MovieController>/createReview
         [Route("createReview")]
         [HttpPost]
         public async Task<IActionResult> CreateMovieReviewListAsync([FromBody] CreateMovieReviewListRequest request)
