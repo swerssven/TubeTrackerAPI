@@ -16,21 +16,56 @@ namespace TubeTrackerAPI.Services
             _dbContext = dbContext;
         }
 
-
-        internal async Task<IEnumerable<Post>> GetPostsList(bool forFriends, int userId)
+        internal async Task<IEnumerable<FriendDto>> GetSearchFriendsList(int userId, string searchParam)
         {
             SocialRepository socialRepository = new SocialRepository(_dbContext);
 
-            IEnumerable<Post> postsResponse = await socialRepository.GetPostsList(forFriends, userId);
+            IEnumerable<FriendDto> searchFriendsResponse = await socialRepository.GetSearchFriendsList(userId, searchParam);
+
+            return searchFriendsResponse;
+        }
+
+        internal async Task<IEnumerable<FriendDto>> GetFriendsList(int userId)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            IEnumerable<FriendDto> friendsResponse = await socialRepository.GetFriendsList(userId);
+
+            return friendsResponse;
+        }
+
+        internal async Task<FriendDto> CreateFriendInvitation(int userId, int friendUserId)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            FriendDto postsResponse = await socialRepository.CreateFriendInvitation(userId, friendUserId);
 
             return postsResponse;
         }
 
-        internal async Task<IEnumerable<Post>> CreatePost(CreatePostRequest request)
+        internal async Task<FriendDto> AcceptFriendship(int userId, int friendUserId)
         {
             SocialRepository socialRepository = new SocialRepository(_dbContext);
 
-            IEnumerable<Post> postsResponse = await socialRepository.CreatePost(request);
+            FriendDto postsResponse = await socialRepository.AcceptFriendship(userId, friendUserId);
+
+            return postsResponse;
+        }
+
+        internal async Task<IEnumerable<PostDto>> GetPostsList(bool forFriends, int userId)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            IEnumerable<PostDto> postsResponse = await socialRepository.GetPostsList(forFriends, userId);
+
+            return postsResponse;
+        }
+
+        internal async Task<IEnumerable<PostDto>> CreatePost(CreatePostRequest request)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            IEnumerable<PostDto> postsResponse = await socialRepository.CreatePost(request);
 
             return postsResponse;
         }

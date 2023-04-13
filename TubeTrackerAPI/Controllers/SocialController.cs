@@ -19,6 +19,46 @@ namespace TubeTrackerAPI.Controllers
             _dbContext = dbContext;
         }
 
+        //GET api/<SocialController>/getFriends?searchParam=carlitos
+        [Route("getSearchFriendsList")]
+        [HttpGet]
+        public async Task<IActionResult> getSearchFriendsListAsync([FromQuery] int userId, [FromQuery] string searchParam)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.GetSearchFriendsList(userId, searchParam));
+        }
+
+        //GET api/<SocialController>/getFriends?userId=1
+        [Route("getFriendsList")]
+        [HttpGet]
+        public async Task<IActionResult> GetFriendsListAsync([FromQuery] int userId)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.GetFriendsList(userId));
+        }
+
+        //POST api/<SocialController>/createFriendInvitation?userId=1&friendUserId=2
+        [Route("createFriendInvitation")]
+        [HttpPost]
+        public async Task<IActionResult> CreateFriendInvitationAsync([FromQuery] int userId, [FromQuery] int friendUserId)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.CreateFriendInvitation(userId, friendUserId));
+        }
+
+        //POST api/<SocialController>/AcceptFriendship?userId=1&friendUserId=2
+        [Route("acceptFriendship")]
+        [HttpPost]
+        public async Task<IActionResult> AcceptFriendship([FromQuery] int userId, [FromQuery] int friendUserId)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.AcceptFriendship(userId, friendUserId));
+        }
+
         //GET api/<SocialController>/getPosts/
         [Route("getPostsList")]
         [HttpGet]

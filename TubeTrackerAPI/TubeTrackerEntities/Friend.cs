@@ -5,6 +5,8 @@ namespace TubeTrackerAPI.TubeTrackerEntities;
 
 public partial class Friend
 {
+    public int FriendsId { get; set; }
+
     public int UserId { get; set; }
 
     public int FriendUserId { get; set; }

@@ -5,6 +5,8 @@ namespace TubeTrackerAPI.TubeTrackerEntities;
 
 public partial class Message
 {
+    public int MessagesId { get; set; }
+
     public int SenderUserId { get; set; }
 
     public int ReceiverUserId { get; set; }

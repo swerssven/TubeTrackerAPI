@@ -27,8 +27,6 @@ public partial class Series
 
     public DateTime? PremiereDate { get; set; }
 
-    public string Trailer { get; set; }
-
     public string Poster { get; set; }
 
     public string Backdrop { get; set; }

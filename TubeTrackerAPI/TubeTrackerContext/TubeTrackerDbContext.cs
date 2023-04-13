@@ -87,22 +87,22 @@ public partial class TubeTrackerDbContext : DbContext
 
         modelBuilder.Entity<Friend>(entity =>
         {
-            entity.HasNoKey();
+            entity.HasKey(e => e.FriendsId).HasName("PK_Friends_FriendsId");
 
             entity.HasIndex(e => new { e.UserId, e.FriendUserId }, "UK_Friends_UserId_FriendUserId").IsUnique();
 
-            entity.HasOne(d => d.FriendUser).WithMany()
+            entity.HasOne(d => d.FriendUser).WithMany(p => p.FriendFriendUsers)
                 .HasForeignKey(d => d.FriendUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.User).WithMany()
+            entity.HasOne(d => d.User).WithMany(p => p.FriendUsers)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<Message>(entity =>
         {
-            entity.HasNoKey();
+            entity.HasKey(e => e.MessagesId).HasName("PK_Messages_MessagesId");
 
             entity.Property(e => e.Content)
                 .IsRequired()
@@ -110,11 +110,11 @@ public partial class TubeTrackerDbContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.CreationDate).HasColumnType("datetime");
 
-            entity.HasOne(d => d.ReceiverUser).WithMany()
+            entity.HasOne(d => d.ReceiverUser).WithMany(p => p.MessageReceiverUsers)
                 .HasForeignKey(d => d.ReceiverUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.SenderUser).WithMany()
+            entity.HasOne(d => d.SenderUser).WithMany(p => p.MessageSenderUsers)
                 .HasForeignKey(d => d.SenderUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
@@ -160,9 +160,14 @@ public partial class TubeTrackerDbContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("TitleES");
-            entity.Property(e => e.Trailer)
+            entity.Property(e => e.TrailerEn)
                 .HasMaxLength(255)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("TrailerEN");
+            entity.Property(e => e.TrailerEs)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("TrailerES");
         });
 
         modelBuilder.Entity<MovieRating>(entity =>
@@ -250,7 +255,7 @@ public partial class TubeTrackerDbContext : DbContext
 
         modelBuilder.Entity<PostComment>(entity =>
         {
-            entity.HasNoKey();
+            entity.HasKey(e => e.PostCommnentsId).HasName("PK_PostComments_PostCommnentsId");
 
             entity.Property(e => e.Content)
                 .IsRequired()
@@ -258,11 +263,11 @@ public partial class TubeTrackerDbContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.CreationDate).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Post).WithMany()
+            entity.HasOne(d => d.Post).WithMany(p => p.PostComments)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.User).WithMany()
+            entity.HasOne(d => d.User).WithMany(p => p.PostComments)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
@@ -358,9 +363,6 @@ public partial class TubeTrackerDbContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("TitleES");
-            entity.Property(e => e.Trailer)
-                .HasMaxLength(255)
-                .IsUnicode(false);
         });
 
         modelBuilder.Entity<User>(entity =>

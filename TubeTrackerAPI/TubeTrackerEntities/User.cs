@@ -29,11 +29,21 @@ public partial class User
 
     public virtual ICollection<FavoriteSeries> FavoriteSeries { get; } = new List<FavoriteSeries>();
 
+    public virtual ICollection<Friend> FriendFriendUsers { get; } = new List<Friend>();
+
+    public virtual ICollection<Friend> FriendUsers { get; } = new List<Friend>();
+
+    public virtual ICollection<Message> MessageReceiverUsers { get; } = new List<Message>();
+
+    public virtual ICollection<Message> MessageSenderUsers { get; } = new List<Message>();
+
     public virtual ICollection<MovieRating> MovieRatings { get; } = new List<MovieRating>();
 
     public virtual ICollection<MovieReview> MovieReviews { get; } = new List<MovieReview>();
 
     public virtual ICollection<News> News { get; } = new List<News>();
+
+    public virtual ICollection<PostComment> PostComments { get; } = new List<PostComment>();
 
     public virtual ICollection<Post> Posts { get; } = new List<Post>();
 

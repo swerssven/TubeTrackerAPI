@@ -13,7 +13,7 @@ namespace TubeTrackerAPI.Repositories
         private const string apiKey = "7d22105ae1b958ce88fe42db67a97318";
         private readonly TubeTrackerDbContext _dbContext;
 
-        public MovieRepository(TubeTrackerDbContext dbContext) 
+        public MovieRepository(TubeTrackerDbContext dbContext)
         {
             this._dbContext = dbContext;
         }
@@ -46,7 +46,7 @@ namespace TubeTrackerAPI.Repositories
         {
             var MovieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == movie.MovieApiId).FirstOrDefaultAsync();
             //MovieQuery = (from m in _dbContext.Movies where m.MovieApiId == movie.MovieApiId select m).FirstOrDefault();
-            
+
             if (MovieQuery == null)
             {
                 _dbContext.Movies.Add(movie);
@@ -58,6 +58,7 @@ namespace TubeTrackerAPI.Repositories
                 MovieQuery.TitleEn = movie.TitleEn;
                 MovieQuery.DescriptionEn = movie.DescriptionEn;
                 MovieQuery.GenresEn = movie.GenresEn;
+                MovieQuery.TrailerEn = movie.TrailerEn;
                 _dbContext.Movies.Update(MovieQuery);
                 await _dbContext.SaveChangesAsync();
             }
@@ -66,6 +67,7 @@ namespace TubeTrackerAPI.Repositories
                 MovieQuery.TitleEs = movie.TitleEs;
                 MovieQuery.DescriptionEs = movie.DescriptionEs;
                 MovieQuery.GenresEs = movie.GenresEs;
+                MovieQuery.TrailerEs = movie.TrailerEs;
                 _dbContext.Movies.Update(MovieQuery);
                 await _dbContext.SaveChangesAsync();
             }
@@ -95,7 +97,7 @@ namespace TubeTrackerAPI.Repositories
             }
         }
 
-        public async Task<IEnumerable<MovieReviewDto>>  GetMovieReviews(int movieApiId)
+        public async Task<IEnumerable<MovieReviewDto>> GetMovieReviews(int movieApiId)
         {
             var movieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == movieApiId).FirstOrDefaultAsync();
 
@@ -128,7 +130,7 @@ namespace TubeTrackerAPI.Repositories
                 movieReview.MovieId = movieQuery.MovieId;
                 _dbContext.MovieReviews.Add(movieReview);
                 await _dbContext.SaveChangesAsync();
-            } 
+            }
             else if (reviewQuery != null)
             {
                 reviewQuery.Content = movieReview.Content;
@@ -138,7 +140,8 @@ namespace TubeTrackerAPI.Repositories
             }
 
             List<MovieReviewDto> movieReviewList = await _dbContext.MovieReviews.Where(m => m.MovieId == movieQuery.MovieId)
-                .Select(m => new MovieReviewDto() { 
+                .Select(m => new MovieReviewDto()
+                {
                     MovieReviewId = m.MovieReviewId,
                     Content = m.Content,
                     UserId = m.UserId,

@@ -27,13 +27,15 @@ public partial class Movie
 
     public DateTime? PremiereDate { get; set; }
 
-    public string Trailer { get; set; }
-
     public string Poster { get; set; }
 
     public string Backdrop { get; set; }
 
     public int? Duration { get; set; }
+
+    public string TrailerEs { get; set; }
+
+    public string TrailerEn { get; set; }
 
     public virtual ICollection<FavoriteMovie> FavoriteMovies { get; } = new List<FavoriteMovie>();
 

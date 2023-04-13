@@ -33,8 +33,6 @@ namespace TubeTrackerAPI.Services
 
             ExternalSerieDetails externalSerieDetailsResponse = JsonConvert.DeserializeObject<ExternalSerieDetails>(resultStr);
 
-            string trailer = externalSerieDetailsResponse.videos.results.Where(t => t.type == "Trailer").FirstOrDefault()?.key;
-
             List<SerieCast> cast = externalSerieDetailsResponse.credits.cast.Where(c => c.known_for_department == "Acting").ToList();
             string actors = null;
             if (cast != null)
@@ -62,7 +60,6 @@ namespace TubeTrackerAPI.Services
             serie.Actors = actors;
             serie.Creators = directors;
             serie.PremiereDate = DateTimeOffset.Parse(externalSerieDetailsResponse.first_air_date).UtcDateTime;
-            serie.Trailer = trailer;
             serie.Poster = externalSerieDetailsResponse.poster_path;
             serie.Backdrop = externalSerieDetailsResponse.backdrop_path;
 

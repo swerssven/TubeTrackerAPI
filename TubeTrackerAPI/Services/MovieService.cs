@@ -65,7 +65,6 @@ namespace TubeTrackerAPI.Services
             movie.Actors = actors;
             movie.Directors = directors;
             movie.PremiereDate = DateTimeOffset.Parse(externalMovieDetailsResponse.release_date).UtcDateTime;
-            movie.Trailer = trailer;
             movie.Poster = externalMovieDetailsResponse.poster_path;
             movie.Backdrop = externalMovieDetailsResponse.backdrop_path;
             movie.Duration = externalMovieDetailsResponse.runtime;
@@ -75,12 +74,14 @@ namespace TubeTrackerAPI.Services
                 movie.TitleEn = externalMovieDetailsResponse.title;
                 movie.DescriptionEn = externalMovieDetailsResponse.overview;
                 movie.GenresEn = genres;
+                movie.TrailerEn = trailer;
             } 
             else if (language == "es-ES")
             {
                 movie.TitleEs = externalMovieDetailsResponse.title;
                 movie.DescriptionEs = externalMovieDetailsResponse.overview;
                 movie.GenresEs = genres;
+                movie.TrailerEs = trailer;
             }
 
             return await movieRepository.CreateMovie(movie); 
