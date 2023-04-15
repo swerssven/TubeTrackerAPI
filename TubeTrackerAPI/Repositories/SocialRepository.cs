@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
 using TubeTrackerAPI.Models.Request;
@@ -110,6 +111,37 @@ namespace TubeTrackerAPI.Repositories
 
             return friend;
         }
+
+        internal async Task<IEnumerable<Message>> CreateMessage(CreateMessageRequest request)
+        {
+            await _dbContext.Messages.Where(m => m.ReceiverUserId == request.SenderUserId)
+                .ForEachAsync(m => { m.IsRead = true; }); // Mark old incomming messages as read.
+
+            Message message = new Message();
+            message.SenderUserId = request.SenderUserId;
+            message.ReceiverUserId = request.ReceiverUserId;
+            message.Content = request.Content;
+            message.CreationDate = DateTime.UtcNow;
+            message.IsRead = false;
+
+            _dbContext.Messages.Add(message);
+            await _dbContext.SaveChangesAsync();
+
+            IEnumerable<Message> messagesResponse = await _dbContext.Messages.Where(m => m.SenderUserId == request.SenderUserId || m.ReceiverUserId == request.SenderUserId).OrderBy(m => m.CreationDate).ToListAsync();
+
+            return messagesResponse;
+        }
+
+        internal async Task<IEnumerable<Message>> getMessagesList(int userId, int friendUserId)
+        {
+            IEnumerable<Message> messagesResponse = await _dbContext.Messages
+                .Where(m => m.SenderUserId == userId && m.ReceiverUserId == friendUserId || m.SenderUserId == friendUserId && m.ReceiverUserId == userId)
+                .OrderBy(m => m.CreationDate).ToListAsync();
+
+            return messagesResponse;
+        }
+
+        //internal async Task<int> getNumberUnreadMessages() 
 
         internal async Task<IEnumerable<PostDto>> GetPostsList(bool forFriends, int userId)
         {

@@ -40,13 +40,17 @@ namespace TubeTrackerAPI.Repositories
         }
 
         // Create new serie in data base
-        public async Task<Series> CreateSerie(Series serie)
+        public async Task<Series> CreateSerie(Series serie, List<SeasonsEpisode> seasonsEpisodes)
         {
-            var SerieQuery = await _dbContext.Series.Where(m => m.SerieApiId == serie.SerieApiId).FirstOrDefaultAsync();
-            //var SerieQuery = await _dbContext.Series.Include(s => s.SeasonsEpisodes).Where(m => m.SerieApiId == serie.SerieApiId).FirstOrDefaultAsync();
+            var SerieQuery = await _dbContext.Series.Where(m => m.SerieApiId == serie.SerieApiId).Include(m => m.SeasonsEpisodes).FirstOrDefaultAsync();
+            // Falta include seasonsEpisodes
 
             if (SerieQuery == null)
             {
+                //foreach (var season in seasonsEpisodes)
+                //{
+                //    _dbContext.SeasonsEpisodes.Add(season);
+                //}
                 _dbContext.Series.Add(serie);
                 await _dbContext.SaveChangesAsync();
                 SerieQuery = serie;
@@ -69,15 +73,11 @@ namespace TubeTrackerAPI.Repositories
             }
 
             return SerieQuery;
-
         }
 
-        // Gets a serie from external API
-        public async Task<string> GetSerieExternal(int id, string language)
+        public async Task<string> GetSeasonExternal(int serieId, int numSeason, string language)
         {
-            string apiURL = $"/tv/{id}?api_key={apiKey}&language={language}&append_to_response=videos,credits";
-
-            //SeasonsEpisode = await _dbContext.Series.Include(s => s.SeasonsEpisodes).Where(s => s.SerieApiId == id)
+            string apiURL = $"/tv/{serieId}/season/{numSeason}?api_key={apiKey}&language={language}";
 
             using (var client = new HttpClient())
             {
@@ -89,45 +89,31 @@ namespace TubeTrackerAPI.Repositories
                     {
                         apiResponse = await response.Content.ReadAsStringAsync();
                     }
-                    //string prueba = await GetSeasonsExternal(1100, "es-ES", 2);
+
                     return apiResponse;
                 }
             }
         }
-        /*
-        // Gets a seasons from external API
-        public async Task<string> GetSeasonsExternal(int id, string language, int numOfSeasons)
+
+        // Gets a serie from external API
+        public async Task<string> GetSerieExternal(int id, string language)
         {
-            List<string> seasonsList = new List<string>();
+            string apiURL = $"/tv/{id}?api_key={apiKey}&language={language}&append_to_response=videos,credits";
 
-            for (int i = 1; i <= numOfSeasons; i++)
+            using (var client = new HttpClient())
             {
-
-                string apiURL = $"/tv/{id}/season/{i}?api_key={apiKey}&language={language}";
-
-                //SeasonsEpisode = await _dbContext.Series.Include(s => s.SeasonsEpisodes).Where(s => s.SerieApiId == id)
-
-                using (var client = new HttpClient())
+                using (var response = await client.GetAsync(URL + apiURL))
                 {
-                    using (var response = await client.GetAsync(URL + apiURL))
+                    string apiResponse = string.Empty;
+
+                    if (response.IsSuccessStatusCode)
                     {
-                        string apiResponse = string.Empty;
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            apiResponse = await response.Content.ReadAsStringAsync();
-                        }
-
-                        seasonsList.Add(apiResponse);
+                        apiResponse = await response.Content.ReadAsStringAsync();
                     }
+
+                    return apiResponse;
                 }
-
             }
-
-            string seasonsStringResponse = (JsonConvert.SerializeObject(seasonsList));
-            var list = JsonConvert.DeserializeObject(seasonsStringResponse);
-
-            return seasonsStringResponse;
-        }*/
+        }
     }
 }

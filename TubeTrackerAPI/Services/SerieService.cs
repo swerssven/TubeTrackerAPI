@@ -29,9 +29,36 @@ namespace TubeTrackerAPI.Services
         {
 
             SerieRepository serieRepository = new SerieRepository(this._dbContext);
-            string resultStr = await serieRepository.GetSerieExternal(id, language);
+            string resultSerieStr = await serieRepository.GetSerieExternal(id, language);
+            ExternalSerieDetails externalSerieDetailsResponse = JsonConvert.DeserializeObject<ExternalSerieDetails>(resultSerieStr);
 
-            ExternalSerieDetails externalSerieDetailsResponse = JsonConvert.DeserializeObject<ExternalSerieDetails>(resultStr);
+            List<SeasonsEpisode> seasonsEpisodesList = new List<SeasonsEpisode>();
+            for (int numSeason = 1; numSeason <= externalSerieDetailsResponse.number_of_seasons; numSeason++)
+            {
+                string resultSeasonsEpisodesStr = await serieRepository.GetSeasonExternal(id, numSeason, language);
+                ExternalSeasonDetails externalSeasonsDetails = JsonConvert.DeserializeObject<ExternalSeasonDetails>(resultSeasonsEpisodesStr);
+
+
+                for (int numEpisode = 0; numEpisode < externalSeasonsDetails.episodes.Count(); numEpisode++)
+                {
+                    SeasonsEpisode seasonsEpisode = new SeasonsEpisode();
+                    seasonsEpisode.SerieId = externalSerieDetailsResponse.id;
+                    seasonsEpisode.NumSeason = numSeason;
+                    seasonsEpisode.NumEpisode = externalSeasonsDetails.episodes.ElementAt(numEpisode).episode_number;
+                    seasonsEpisode.EpisodeDuration = externalSeasonsDetails.episodes.ElementAt(numEpisode).runtime;
+                    seasonsEpisode.PremiereDate = DateTimeOffset.Parse(externalSeasonsDetails.episodes.ElementAt(numEpisode).air_date).UtcDateTime;
+
+                    if (language == "en-EN")
+                    {
+                        seasonsEpisode.TitleEpisodeEn = externalSeasonsDetails.episodes.ElementAt(numEpisode).name;
+                    }
+                    else if (language == "es-ES")
+                    {
+                        seasonsEpisode.TitleEpisodeEs = externalSeasonsDetails.episodes.ElementAt(numEpisode).name;
+                    }
+                    seasonsEpisodesList.Add(seasonsEpisode);
+                }
+            }
 
             List<SerieCast> cast = externalSerieDetailsResponse.credits.cast.Where(c => c.known_for_department == "Acting").ToList();
             string actors = null;
@@ -76,7 +103,7 @@ namespace TubeTrackerAPI.Services
                 serie.GenresEs = genres;
             }
 
-            return await serieRepository.CreateSerie(serie);
+            return await serieRepository.CreateSerie(serie, seasonsEpisodesList);
         }
     }
 }

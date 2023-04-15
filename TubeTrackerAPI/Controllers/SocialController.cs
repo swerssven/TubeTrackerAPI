@@ -20,7 +20,7 @@ namespace TubeTrackerAPI.Controllers
         }
 
         //GET api/<SocialController>/getFriends?searchParam=carlitos
-        [Route("getSearchFriendsList")]
+        [Route("friends/getSearchFriendsList")]
         [HttpGet]
         public async Task<IActionResult> getSearchFriendsListAsync([FromQuery] int userId, [FromQuery] string searchParam)
         {
@@ -30,7 +30,7 @@ namespace TubeTrackerAPI.Controllers
         }
 
         //GET api/<SocialController>/getFriends?userId=1
-        [Route("getFriendsList")]
+        [Route("friends/getFriendsList")]
         [HttpGet]
         public async Task<IActionResult> GetFriendsListAsync([FromQuery] int userId)
         {
@@ -40,7 +40,7 @@ namespace TubeTrackerAPI.Controllers
         }
 
         //POST api/<SocialController>/createFriendInvitation?userId=1&friendUserId=2
-        [Route("createFriendInvitation")]
+        [Route("friends/createFriendInvitation")]
         [HttpPost]
         public async Task<IActionResult> CreateFriendInvitationAsync([FromQuery] int userId, [FromQuery] int friendUserId)
         {
@@ -50,17 +50,37 @@ namespace TubeTrackerAPI.Controllers
         }
 
         //POST api/<SocialController>/AcceptFriendship?userId=1&friendUserId=2
-        [Route("acceptFriendship")]
+        [Route("friends/acceptFriendship")]
         [HttpPost]
-        public async Task<IActionResult> AcceptFriendship([FromQuery] int userId, [FromQuery] int friendUserId)
+        public async Task<IActionResult> AcceptFriendshipAsync([FromQuery] int userId, [FromQuery] int friendUserId)
         {
             SocialService socialService = new SocialService(this._dbContext);
 
             return Ok(await socialService.AcceptFriendship(userId, friendUserId));
         }
 
+        //POST api/<SocialController>/createMessage
+        [Route("messages/createMessage")]
+        [HttpPost]
+        public async Task<IActionResult> CreateMessagesAsync([FromBody] CreateMessageRequest request)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.CreateMessage(request));
+        }
+
+        //GET api/<SocialController>/getMessageList?userId=1&friendUserId=2
+        [Route("messages/getMessagesList")]
+        [HttpGet]
+        public async Task<IActionResult> GetMessagesListAsync(int userId, int friendUserId)
+        {
+            SocialService socialService = new SocialService(_dbContext);
+
+            return Ok(await socialService.getMessagesList(userId, friendUserId));
+        }
+
         //GET api/<SocialController>/getPosts/
-        [Route("getPostsList")]
+        [Route("posts/getPostsList")]
         [HttpGet]
         public async Task<IActionResult> GetPostsListAsync([FromQuery] bool forFriends, [FromQuery] int userId)
         {
@@ -70,7 +90,7 @@ namespace TubeTrackerAPI.Controllers
         }
 
         //POST api/<SocialController>/createPost
-        [Route("createPost")]
+        [Route("posts/createPost")]
         [HttpPost]
         public async Task<IActionResult> CreatePostAsync([FromBody] CreatePostRequest request)
         {

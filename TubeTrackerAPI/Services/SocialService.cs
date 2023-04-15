@@ -52,6 +52,24 @@ namespace TubeTrackerAPI.Services
             return postsResponse;
         }
 
+        internal async Task<IEnumerable<Message>> CreateMessage(CreateMessageRequest request)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            IEnumerable<Message> messagesResponse = await socialRepository.CreateMessage(request);
+
+            return messagesResponse;
+        }
+
+        internal async Task<IEnumerable<Message>> getMessagesList(int userId, int friendUserId)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            IEnumerable<Message> messagesResponse = await socialRepository.getMessagesList(userId, friendUserId);
+
+            return messagesResponse;
+        }
+
         internal async Task<IEnumerable<PostDto>> GetPostsList(bool forFriends, int userId)
         {
             SocialRepository socialRepository = new SocialRepository(_dbContext);
