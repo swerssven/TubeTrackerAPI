@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Services;
 using TubeTrackerAPI.TubeTrackerContext;
 
@@ -35,6 +36,46 @@ namespace TubeTrackerAPI.Controllers
             SerieService serieService = new SerieService(this._dbContext);
 
             return Ok(await serieService.CreateSerie(id, language));
+        }
+
+        // GET api/<SerieController>/getReviews?serieApiId=5
+        [Route("getReviews")]
+        [HttpGet]
+        public async Task<IActionResult> GetReviewsAsync([FromQuery] int serieApiId)
+        {
+            SerieService serieService = new SerieService(this._dbContext);
+
+            return Ok(await serieService.GetSerieReviews(serieApiId));
+        }
+
+        // POST api/<SerieController>/createReview
+        [Route("createReview")]
+        [HttpPost]
+        public async Task<IActionResult> CreateSerieReviewListAsync([FromBody] CreateSerieReviewListRequest request)
+        {
+            SerieService serieService = new SerieService(this._dbContext);
+
+            return Ok(await serieService.CreateSerieReviewList(request));
+        }
+
+        // POST api/<SerieController>/setSerieRating?serieApiId=76600&userId=1&rating=5
+        [Route("setSerieRating")]
+        [HttpPost]
+        public async Task<IActionResult> SetSerieRating([FromQuery] int serieApiId, [FromQuery] int userId, [FromQuery] int rating)
+        {
+            SerieService serieService = new SerieService(_dbContext);
+
+            return Ok(await serieService.SetSerieRating(serieApiId, userId, rating));
+        }
+
+        // GET api/<SerieController>/getSerieRatings?userId=1&serieApiId=5
+        [Route("getSerieRatings")]
+        [HttpGet]
+        public async Task<IActionResult> GetReviewsAsync([FromQuery] int userId, [FromQuery] int serieApiId)
+        {
+            SerieService serieService = new SerieService(this._dbContext);
+
+            return Ok(await serieService.GetSerieRatings(userId, serieApiId));
         }
     }
 }

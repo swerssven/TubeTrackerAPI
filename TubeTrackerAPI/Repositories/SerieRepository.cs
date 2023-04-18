@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using TubeTrackerAPI.Models;
+using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
 
@@ -141,6 +143,109 @@ namespace TubeTrackerAPI.Repositories
                     return apiResponse;
                 }
             }
+        }
+
+        public async Task<IEnumerable<SerieReviewDto>> GetSerieReviews(int serieApiId)
+        {
+            var serieQuery = await _dbContext.Series.Include(m => m.SerieReviews).Where(m => m.SerieApiId == serieApiId).FirstOrDefaultAsync();
+
+            List<SerieReviewDto> serieReviewList = await _dbContext.SerieReviews.Where(m => m.SerieId == serieQuery.SerieId)
+                .Select(m => new SerieReviewDto()
+                {
+                    SerieReviewId = m.SerieReviewId,
+                    Content = m.Content,
+                    UserId = m.UserId,
+                    UserNickname = m.User.Nickname,
+                    UserImage = m.User.Image,
+                    CreationDate = m.CreationDate
+                }).ToListAsync();
+
+            return serieReviewList;
+        }
+
+        public async Task<IEnumerable<SerieReviewDto>> CreateSerieReviewList(CreateSerieReviewListRequest request)
+        {
+            var serieQuery = await _dbContext.Series.Include(m => m.SerieReviews).Where(m => m.SerieApiId == request.SerieApiId).FirstOrDefaultAsync();
+            var reviewQuery = serieQuery.SerieReviews.Where(m => m.UserId == request.UserId).FirstOrDefault();
+
+            SerieReview serieReview = new SerieReview();
+            serieReview.Content = request.Content;
+            serieReview.UserId = request.UserId;
+            serieReview.CreationDate = DateTime.UtcNow;
+
+            if (reviewQuery == null && request.Content != null)
+            {
+                serieReview.SerieId = serieQuery.SerieId;
+                _dbContext.SerieReviews.Add(serieReview);
+                await _dbContext.SaveChangesAsync();
+            }
+            else if (reviewQuery != null)
+            {
+                reviewQuery.Content = serieReview.Content;
+                reviewQuery.CreationDate = serieReview.CreationDate;
+                _dbContext.SerieReviews.Update(reviewQuery);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            List<SerieReviewDto> serieReviewList = await _dbContext.SerieReviews.Where(m => m.SerieId == serieQuery.SerieId)
+                .Select(m => new SerieReviewDto()
+                {
+                    SerieReviewId = m.SerieReviewId,
+                    Content = m.Content,
+                    UserId = m.UserId,
+                    UserNickname = m.User.Nickname,
+                    UserImage = m.User.Image,
+                    CreationDate = m.CreationDate
+                }).ToListAsync();
+
+            return serieReviewList;
+        }
+
+        public async Task<int> SetSerieRating(SerieRating serieRating)
+        {
+            var ratingQuery = _dbContext.SerieRatings.Where(r => r.SerieId == serieRating.SerieId && r.UserId == serieRating.UserId).FirstOrDefault();
+
+            if (ratingQuery == null)
+            {
+                _dbContext.SerieRatings.Add(serieRating);
+                await _dbContext.SaveChangesAsync();
+                ratingQuery = serieRating;
+            }
+            else
+            {
+                ratingQuery.Rating = serieRating.Rating;
+                _dbContext.SerieRatings.Update(ratingQuery);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return ratingQuery.Rating;
+        }
+
+        public async Task<RatingsDto> GetSerieRatings(int userId, int serieApiId)
+        {
+            RatingsDto ratingsDto = new RatingsDto();
+            int serieId = await getSerieDbId(serieApiId);
+            var RatingQuery = await _dbContext.SerieRatings.Where(r => r.SerieId == serieId).ToListAsync();
+
+            if (!RatingQuery.IsNullOrEmpty())
+            {
+                ratingsDto.AverageRating = RatingQuery.Average(r => r.Rating);
+                var tmp = RatingQuery.FirstOrDefault(r => r.UserId == userId);
+
+                if (tmp != null)
+                {
+                    ratingsDto.UserRating = tmp.Rating;
+                }
+            }
+
+            return ratingsDto;
+        }
+
+        public async Task<int> getSerieDbId(int serieApiId)
+        {
+            var serie = await _dbContext.Series.Where(m => m.SerieApiId == serieApiId).FirstOrDefaultAsync();
+
+            return serie.SerieId;
         }
     }
 }

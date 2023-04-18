@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models;
 using Azure.Core;
+using Microsoft.IdentityModel.Tokens;
 
 namespace TubeTrackerAPI.Repositories
 {
@@ -179,7 +180,7 @@ namespace TubeTrackerAPI.Repositories
             int movieId = await getMovieDbId(movieApiId);
             var RatingQuery = await _dbContext.MovieRatings.Where(r =>  r.MovieId == movieId).ToListAsync();
 
-            if (RatingQuery != null)
+            if (!RatingQuery.IsNullOrEmpty())
             {
                 ratingsDto.AverageRating = RatingQuery.Average(r => r.Rating);
                 var tmp = RatingQuery.FirstOrDefault(r => r.UserId == userId);

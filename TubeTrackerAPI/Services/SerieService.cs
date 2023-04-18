@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using TubeTrackerAPI.Models;
+using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.Repositories;
 using TubeTrackerAPI.TubeTrackerContext;
@@ -103,6 +104,44 @@ namespace TubeTrackerAPI.Services
             }
 
             return await serieRepository.CreateSerie(serie, seasonsEpisodesList);
+        }
+
+        public async Task<IEnumerable<SerieReviewDto>> GetSerieReviews(int serieApiId)
+        {
+            SerieRepository serieRepository = new SerieRepository(_dbContext);
+
+            IEnumerable<SerieReviewDto> serieReviewResponse = await serieRepository.GetSerieReviews(serieApiId);
+
+            return serieReviewResponse;
+        }
+
+        public async Task<IEnumerable<SerieReviewDto>> CreateSerieReviewList(CreateSerieReviewListRequest request)
+        {
+            SerieRepository serieRepository = new SerieRepository(_dbContext);
+
+            IEnumerable<SerieReviewDto> serieReviewResponse = await serieRepository.CreateSerieReviewList(request);
+
+            return serieReviewResponse;
+        }
+
+        public async Task<int> SetSerieRating(int serieApiId, int userId, int rating)
+        {
+            SerieRepository serieRepository = new SerieRepository(_dbContext);
+
+            SerieRating serieRating = new SerieRating();
+
+            serieRating.SerieId = await serieRepository.getSerieDbId(serieApiId);
+            serieRating.UserId = userId;
+            serieRating.Rating = rating;
+
+            return await serieRepository.SetSerieRating(serieRating);
+        }
+
+        public async Task<RatingsDto> GetSerieRatings(int userId, int serieApiId)
+        {
+            SerieRepository serieRepository = new SerieRepository(_dbContext);
+
+            return await serieRepository.GetSerieRatings(userId, serieApiId);
         }
     }
 }
