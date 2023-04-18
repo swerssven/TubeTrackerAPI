@@ -26,6 +26,24 @@ namespace TubeTrackerAPI.Services
             return serieResponse;
         }
 
+        public async Task<SerieResponse> GetSeriePopularList(int page, string language)
+        {
+            string resultStr = await new SerieRepository(this._dbContext).GetSeriePopularList(page, language);
+
+            SerieResponse serieResponse = JsonConvert.DeserializeObject<SerieResponse>(resultStr);
+
+            return serieResponse;
+        }
+
+        public async Task<SerieResponse> GetSerieTopRatedList(string language)
+        {
+            string resultStr = await new SerieRepository(this._dbContext).GetSerieTopRatedList(language);
+
+            SerieResponse serieResponse = JsonConvert.DeserializeObject<SerieResponse>(resultStr);
+
+            return serieResponse;
+        }
+
         public async Task<Series> CreateSerie(int id, string language)
         {
 

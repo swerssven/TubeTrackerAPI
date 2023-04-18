@@ -22,12 +22,28 @@ namespace TubeTrackerAPI.Controllers
             _dbContext = dbContext;
         }
 
-        // GET api/<MovieController>
-        [Route("getMovieList")]
+        // GET api/<MovieController>/getMovieSearchList?filter=Avatar&page=1&language=es-ES
+        [Route("getMovieSearchList")]
         [HttpGet]
-        public async Task<IActionResult> GetListAsync([FromQuery]string filter, [FromQuery]int page, [FromQuery]string language)
+        public async Task<IActionResult> GetMovieSearchListAsync([FromQuery]string filter, [FromQuery]int page, [FromQuery]string language)
         {
             return Ok(await new MovieService(_dbContext).GetMovieSearchList(filter, page, language));
+        }
+
+        // GET api/<MovieController>/getMoviePopularList?page=1&language=es-ES
+        [Route("getMoviePopularList")]
+        [HttpGet]
+        public async Task<IActionResult> GetMoviePopularListAsync([FromQuery] int page, [FromQuery] string language)
+        {
+            return Ok(await new MovieService(_dbContext).GetMoviePopularList(page, language));
+        }
+
+        // GET api/<MovieController>getMovieTopRatedList?page=1&language=es-ES
+        [Route("getMovieTopRatedList")]
+        [HttpGet]
+        public async Task<IActionResult> GetMovieTopRatedListAsync([FromQuery] string language)
+        {
+            return Ok(await new MovieService(_dbContext).GetMovieTopRatedList(language));
         }
 
         // GET api/<MovieController>?id=5&language=es-ES

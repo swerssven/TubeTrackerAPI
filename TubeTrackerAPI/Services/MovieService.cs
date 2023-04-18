@@ -28,6 +28,24 @@ namespace TubeTrackerAPI.Services
             return movieResponse;  
         }
 
+        public async Task<MovieResponse> GetMoviePopularList(int page, string language)
+        {
+            string resultStr = await new MovieRepository(this._dbContext).GetMoviePopularList(page, language);
+
+            MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
+
+            return movieResponse;
+        }
+
+        public async Task<MovieResponse> GetMovieTopRatedList(string language)
+        {
+            string resultStr = await new MovieRepository(this._dbContext).GetMovieTopRatedList(language);
+
+            MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
+
+            return movieResponse;
+        }
+
         public async Task<Movie> CreateMovie(int id, string language)
         {
 

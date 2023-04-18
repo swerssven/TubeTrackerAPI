@@ -24,7 +24,47 @@ namespace TubeTrackerAPI.Repositories
         public async Task<string> GetMovieSearchList(string filter, int page, string language)
         {
             string apiURL = $"/search/movie?api_key={apiKey}&language={language}&query={filter}&page={page}&include_adult=false";
-            //List<ExternalMovie> movieList = new List<ExternalMovie>();
+
+            using (var client = new HttpClient())
+            {
+                using (var response = await client.GetAsync(URL + apiURL))
+                {
+                    string apiResponse = string.Empty;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        apiResponse = await response.Content.ReadAsStringAsync();
+                    }
+
+                    return apiResponse;
+                }
+            }
+        }
+
+        public async Task<string> GetMoviePopularList(int page, string language)
+        {
+            string apiURL = $"/movie/popular?api_key={apiKey}&language={language}&page={page}";
+
+            using (var client = new HttpClient())
+            {
+                using (var response = await client.GetAsync(URL + apiURL))
+                {
+                    string apiResponse = string.Empty;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        apiResponse = await response.Content.ReadAsStringAsync();
+                    }
+
+                    return apiResponse;
+                }
+            }
+        }
+
+        public async Task<string> GetMovieTopRatedList(string language)
+        {
+            Random rnd = new Random();
+            string apiURL = $"/movie/top_rated?api_key={apiKey}&language={language}&page={rnd.Next(1, 10)}";
 
             using (var client = new HttpClient())
             {

@@ -20,12 +20,28 @@ namespace TubeTrackerAPI.Controllers
             _dbContext = dbContext;
         }
 
-        // GET api/<SerieController>
-        [Route("getSerieList")]
+        // GET api/<SerieController>/getSerieSearchList?filter=BigBang&page=1&language=es-ES
+        [Route("getSerieSearchList")]
         [HttpGet]
-        public async Task<IActionResult> GetListAsync([FromQuery] string filter, [FromQuery] int page, [FromQuery] string language)
+        public async Task<IActionResult> GetSerieSearchListAsync([FromQuery] string filter, [FromQuery] int page, [FromQuery] string language)
         {
             return Ok(await new SerieService(_dbContext).GetSerieSearchList(filter, page, language));
+        }
+
+        // GET api/<SerieController>/getSeriePopularListt?page=1&language=es-ES
+        [Route("getSeriePopularList")]
+        [HttpGet]
+        public async Task<IActionResult> GetSeriePopularListAsync([FromQuery] int page, [FromQuery] string language)
+        {
+            return Ok(await new SerieService(_dbContext).GetSeriePopularList(page, language));
+        }
+
+        // GET api/<SerieController>/getSerieTopRatedList?page=1&language=es-ES
+        [Route("getSerieTopRatedList")]
+        [HttpGet]
+        public async Task<IActionResult> GetSerieTopRatedListAsync([FromQuery] string language)
+        {
+            return Ok(await new SerieService(_dbContext).GetSerieTopRatedList(language));
         }
 
         // GET api/<SerieController>?id=5&language=es-ES

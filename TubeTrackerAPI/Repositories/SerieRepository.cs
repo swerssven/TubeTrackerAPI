@@ -41,6 +41,47 @@ namespace TubeTrackerAPI.Repositories
             }
         }
 
+        public async Task<string> GetSeriePopularList(int page, string language)
+        {
+            string apiURL = $"/discover/tv?api_key={apiKey}&with_original_language=en&sort_by=popularity.desc&language={language}";
+
+            using (var client = new HttpClient())
+            {
+                using (var response = await client.GetAsync(URL + apiURL))
+                {
+                    string apiResponse = string.Empty;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        apiResponse = await response.Content.ReadAsStringAsync();
+                    }
+
+                    return apiResponse;
+                }
+            }
+        }
+
+        public async Task<string> GetSerieTopRatedList(string language)
+        {
+            Random rnd = new Random();
+            string apiURL = $"/tv/top_rated?api_key={apiKey}&language={language}&page={rnd.Next(1, 10)}";
+
+            using (var client = new HttpClient())
+            {
+                using (var response = await client.GetAsync(URL + apiURL))
+                {
+                    string apiResponse = string.Empty;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        apiResponse = await response.Content.ReadAsStringAsync();
+                    }
+
+                    return apiResponse;
+                }
+            }
+        }
+
         // Create new serie in data base
         public async Task<Series> CreateSerie(Series serie, List<SeasonsEpisode> seasonsEpisodes)
         {
