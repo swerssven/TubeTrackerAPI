@@ -87,5 +87,20 @@ namespace TubeTrackerAPI.Services
 
             return postsResponse;
         }
+
+        internal async Task<IEnumerable<PostCommentDto>> CreatePostComment(CreatePostCommentRequest request)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            PostComment postComment = new PostComment();
+            postComment.PostId = request.PostId;
+            postComment.UserId = request.UserId;
+            postComment.Content = request.Content;
+            postComment.CreationDate = DateTime.UtcNow;
+
+            IEnumerable<PostCommentDto> postsResponse = await socialRepository.CreatePostComment(postComment);
+
+            return postsResponse;
+        }
     }
 }

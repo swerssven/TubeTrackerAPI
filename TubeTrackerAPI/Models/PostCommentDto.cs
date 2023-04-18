@@ -1,8 +1,6 @@
-﻿using TubeTrackerAPI.TubeTrackerEntities;
-
-namespace TubeTrackerAPI.Models
+﻿namespace TubeTrackerAPI.Models
 {
-    public class PostDto
+    public class PostCommentDto
     {
         public int PostId { get; set; }
 
@@ -15,6 +13,5 @@ namespace TubeTrackerAPI.Models
         public string Content { get; set; }
 
         public DateTime CreationDate { get; set; }
-        public virtual ICollection<PostComment> PostComments { get; set; }
     }
 }

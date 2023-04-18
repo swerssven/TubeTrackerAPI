@@ -98,5 +98,15 @@ namespace TubeTrackerAPI.Controllers
 
             return Ok(await socialService.CreatePost(request));
         }
+
+        //POST api/<SocialController>/createPostComment
+        [Route("posts/createPostComment")]
+        [HttpPost]
+        public async Task<IActionResult> CreatePostCommentAsync([FromBody] CreatePostCommentRequest request)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.CreatePostComment(request));
+        }
     }
 }

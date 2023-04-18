@@ -160,11 +160,13 @@ namespace TubeTrackerAPI.Repositories
                 posts = await _dbContext.Posts.Where(p => friendIdList.Contains(p.UserId)).OrderByDescending(p => p.CreationDate)
                     .Select(p => new PostDto()
                     {
+                        PostId = p.PostId,
                         Content = p.Content,
                         UserId = p.UserId,
                         UserNickname = p.User.Nickname,
                         UserImage = p.User.Image,
-                        CreationDate = p.CreationDate
+                        CreationDate = p.CreationDate,
+                        PostComments = p.PostComments
                     }).ToListAsync();
             }
             else
@@ -172,11 +174,13 @@ namespace TubeTrackerAPI.Repositories
                 posts = await _dbContext.Posts.Where(p => p.UserId == userId).OrderByDescending(p => p.CreationDate)
                     .Select(p => new PostDto()
                     {
+                        PostId = p.PostId,
                         Content = p.Content,
                         UserId = p.UserId,
                         UserNickname = p.User.Nickname,
                         UserImage = p.User.Image,
-                        CreationDate = p.CreationDate
+                        CreationDate = p.CreationDate,
+                        PostComments = p.PostComments
                     }).ToListAsync();
             }
             return posts;
@@ -195,6 +199,27 @@ namespace TubeTrackerAPI.Repositories
             List<PostDto> postList = await _dbContext.Posts.Where(p => p.UserId == request.UserId).OrderByDescending(p => p.CreationDate)
                 .Select(p => new PostDto()
                 {
+                    PostId = p.PostId,
+                    Content = p.Content,
+                    UserId = p.UserId,
+                    UserNickname = p.User.Nickname,
+                    UserImage = p.User.Image,
+                    CreationDate = p.CreationDate,
+                    PostComments = p.PostComments
+                }).ToListAsync();
+
+            return postList;
+        }
+
+        internal async Task<IEnumerable<PostCommentDto>> CreatePostComment(PostComment postComment)
+        {
+            _dbContext.PostComments.Add(postComment);
+            await _dbContext.SaveChangesAsync();
+
+            List<PostCommentDto> postCommentsList = await _dbContext.PostComments.Where(p => p.UserId == postComment.UserId).OrderByDescending(p => p.CreationDate)
+                .Select(p => new PostCommentDto()
+                {
+                    PostId = postComment.PostId,
                     Content = p.Content,
                     UserId = p.UserId,
                     UserNickname = p.User.Nickname,
@@ -202,7 +227,7 @@ namespace TubeTrackerAPI.Repositories
                     CreationDate = p.CreationDate
                 }).ToListAsync();
 
-            return postList;
+            return postCommentsList;
         }
     }
 }
