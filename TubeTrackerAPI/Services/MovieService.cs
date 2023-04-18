@@ -32,6 +32,7 @@ namespace TubeTrackerAPI.Services
         {
 
             MovieRepository movieRepository = new MovieRepository(this._dbContext);
+            
             string resultStr = await movieRepository.GetMovieExternal(id, language);
 
             ExternalMovieDetails externalMovieDetailsResponse = JsonConvert.DeserializeObject<ExternalMovieDetails>(resultStr);
@@ -104,5 +105,26 @@ namespace TubeTrackerAPI.Services
 
             return movieReviewResponse;
         }
+
+        public async Task<int> SetMovieRating(int movieApiId, int userId, int rating)
+        {
+            MovieRepository movieRepository = new MovieRepository(_dbContext);
+
+            MovieRating movieRating = new MovieRating();
+
+            movieRating.MovieId = await movieRepository.getMovieDbId(movieApiId);
+            movieRating.UserId = userId;
+            movieRating.Rating = rating;
+
+            return await movieRepository.SetMovieRating(movieRating);
+        }
+
+        public async Task<RatingsDto> GetMovieRatings(int userId, int movieApiId)
+        {
+            MovieRepository movieRepository = new MovieRepository(_dbContext);
+
+            return await movieRepository.GetMovieRatings(userId, movieApiId);
+        }
+
     }
 }

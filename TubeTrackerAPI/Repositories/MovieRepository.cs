@@ -152,5 +152,52 @@ namespace TubeTrackerAPI.Repositories
 
             return movieReviewList;
         }
+
+        public async Task<int> SetMovieRating(MovieRating movieRating)
+        {
+            var ratingQuery = _dbContext.MovieRatings.Where(r => r.MovieId == movieRating.MovieId && r.UserId == movieRating.UserId).FirstOrDefault();
+
+            if (ratingQuery == null)
+            {
+                _dbContext.MovieRatings.Add(movieRating);
+                await _dbContext.SaveChangesAsync();
+                ratingQuery = movieRating;
+            }
+            else
+            {
+                ratingQuery.Rating = movieRating.Rating;
+                _dbContext.MovieRatings.Update(ratingQuery);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return ratingQuery.Rating;
+        }
+
+        public async Task<RatingsDto> GetMovieRatings(int userId, int movieApiId)
+        {
+            RatingsDto ratingsDto = new RatingsDto();
+            int movieId = await getMovieDbId(movieApiId);
+            var RatingQuery = await _dbContext.MovieRatings.Where(r =>  r.MovieId == movieId).ToListAsync();
+
+            if (RatingQuery != null)
+            {
+                ratingsDto.AverageRating = RatingQuery.Average(r => r.Rating);
+                var tmp = RatingQuery.FirstOrDefault(r => r.UserId == userId);
+
+                if (tmp != null)
+                {
+                    ratingsDto.UserRating = tmp.Rating;
+                }
+            }
+
+            return ratingsDto;
+        }
+
+        public async Task<int> getMovieDbId(int movieApiId)
+        {
+            var movie = await _dbContext.Movies.Where(m => m.MovieApiId == movieApiId).FirstOrDefaultAsync();
+
+            return movie.MovieId;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
@@ -36,7 +37,7 @@ namespace TubeTrackerAPI.Repositories
             {
                 foreach (var friend in friendIdList)
                 {
-                    if(user.UserId == friend.FriendUserId)
+                    if (user.UserId == friend.FriendUserId)
                     {
                         user.FriendshipStatus = friend.FriendshipStatus;
                     }
@@ -114,7 +115,7 @@ namespace TubeTrackerAPI.Repositories
 
         internal async Task<IEnumerable<Message>> CreateMessage(CreateMessageRequest request)
         {
-            await _dbContext.Messages.Where(m => m.ReceiverUserId == request.SenderUserId)
+            await _dbContext.Messages.Where(m => m.ReceiverUserId == request.SenderUserId && m.SenderUserId == request.ReceiverUserId)
                 .ForEachAsync(m => { m.IsRead = true; }); // Mark old incomming messages as read.
 
             Message message = new Message();
@@ -134,6 +135,11 @@ namespace TubeTrackerAPI.Repositories
 
         internal async Task<IEnumerable<Message>> getMessagesList(int userId, int friendUserId)
         {
+            var messagesQuery = await _dbContext.Messages.Where(m => m.ReceiverUserId == userId && m.SenderUserId == friendUserId).ToListAsync();
+            messagesQuery.ForEach(m => { m.IsRead = true; }); // Mark old incomming messages as read.
+            _dbContext.UpdateRange(messagesQuery);
+            await _dbContext.SaveChangesAsync();
+
             IEnumerable<Message> messagesResponse = await _dbContext.Messages
                 .Where(m => m.SenderUserId == userId && m.ReceiverUserId == friendUserId || m.SenderUserId == friendUserId && m.ReceiverUserId == userId)
                 .OrderBy(m => m.CreationDate).ToListAsync();

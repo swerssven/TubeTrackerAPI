@@ -60,5 +60,24 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await movieService.CreateMovieReviewList(request));
         }
 
+        // POST api/<MovieController>/setMovieRating?movieApiId=76600&userId=1&rating=5
+        [Route("setMovieRating")]
+        [HttpPost]
+        public async Task<IActionResult> SetMovieRating([FromQuery] int movieApiId, [FromQuery] int userId, [FromQuery] int rating)
+        {
+            MovieService movieService = new MovieService(_dbContext);
+
+            return Ok(await movieService.SetMovieRating(movieApiId, userId, rating));
+        }
+
+        // GET api/<MovieController>/getMovieRatings?userId=1&movieApiId=5
+        [Route("getMovieRatings")]
+        [HttpGet]
+        public async Task<IActionResult> GetReviewsAsync([FromQuery] int userId, [FromQuery] int movieApiId)
+        {
+            MovieService movieService = new MovieService(this._dbContext);
+
+            return Ok(await movieService.GetMovieRatings(userId, movieApiId));
+        }
     }
 }

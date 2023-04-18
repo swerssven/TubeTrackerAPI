@@ -42,7 +42,6 @@ namespace TubeTrackerAPI.Services
                 for (int numEpisode = 0; numEpisode < externalSeasonsDetails.episodes.Count(); numEpisode++)
                 {
                     SeasonsEpisode seasonsEpisode = new SeasonsEpisode();
-                    seasonsEpisode.SerieId = externalSerieDetailsResponse.id;
                     seasonsEpisode.NumSeason = numSeason;
                     seasonsEpisode.NumEpisode = externalSeasonsDetails.episodes.ElementAt(numEpisode).episode_number;
                     seasonsEpisode.EpisodeDuration = externalSeasonsDetails.episodes.ElementAt(numEpisode).runtime;

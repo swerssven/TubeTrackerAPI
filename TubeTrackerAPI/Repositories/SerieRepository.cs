@@ -42,24 +42,40 @@ namespace TubeTrackerAPI.Repositories
         // Create new serie in data base
         public async Task<Series> CreateSerie(Series serie, List<SeasonsEpisode> seasonsEpisodes)
         {
-            var SerieQuery = await _dbContext.Series.Where(m => m.SerieApiId == serie.SerieApiId).Include(m => m.SeasonsEpisodes).FirstOrDefaultAsync();
-            // Falta include seasonsEpisodes
+            var SerieQuery = await _dbContext.Series.Include(m => m.SeasonsEpisodes).Where(m => m.SerieApiId == serie.SerieApiId).FirstOrDefaultAsync();
 
             if (SerieQuery == null)
             {
-                //foreach (var season in seasonsEpisodes)
-                //{
-                //    _dbContext.SeasonsEpisodes.Add(season);
-                //}
                 _dbContext.Series.Add(serie);
                 await _dbContext.SaveChangesAsync();
                 SerieQuery = serie;
+
+                foreach (var season in seasonsEpisodes)
+                {
+                    season.SerieId = SerieQuery.SerieId;
+                    _dbContext.SeasonsEpisodes.Add(season);
+                }
+
+                await _dbContext.SaveChangesAsync();
             }
             else if (SerieQuery.TitleEn == null && serie.TitleEn != null)
             {
+                //var SeasonQuery = await _dbContext.SeasonsEpisodes.Where(s => s.SerieId == SerieQuery.SerieId).ToListAsync();
+
                 SerieQuery.TitleEn = serie.TitleEn;
                 SerieQuery.DescriptionEn = serie.DescriptionEn;
                 SerieQuery.GenresEn = serie.GenresEn;
+
+                foreach (var episode in SerieQuery.SeasonsEpisodes)
+                {
+                    var episodeExtApi = seasonsEpisodes.FirstOrDefault(e => e.NumSeason == episode.NumSeason && e.NumEpisode == episode.NumEpisode);
+
+                    if(episodeExtApi != null)
+                    {
+                        episode.TitleEpisodeEn = episodeExtApi.TitleEpisodeEn;
+                    }
+                }
+
                 _dbContext.Series.Update(SerieQuery);
                 await _dbContext.SaveChangesAsync();
             }
@@ -68,6 +84,17 @@ namespace TubeTrackerAPI.Repositories
                 SerieQuery.TitleEs = serie.TitleEs;
                 SerieQuery.DescriptionEs = serie.DescriptionEs;
                 SerieQuery.GenresEs = serie.GenresEs;
+
+                foreach (var episode in SerieQuery.SeasonsEpisodes)
+                {
+                    var episodeExtApi = seasonsEpisodes.FirstOrDefault(e => e.NumSeason == episode.NumSeason && e.NumEpisode == episode.NumEpisode);
+
+                    if (episodeExtApi != null)
+                    {
+                        episode.TitleEpisodeEs = episodeExtApi.TitleEpisodeEs;
+                    }
+                }
+
                 _dbContext.Series.Update(SerieQuery);
                 await _dbContext.SaveChangesAsync();
             }
