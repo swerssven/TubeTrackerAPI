@@ -43,7 +43,8 @@ namespace TubeTrackerAPI.Repositories
 
         public async Task<string> GetSeriePopularList(int page, string language)
         {
-            string apiURL = $"/discover/tv?api_key={apiKey}&with_original_language=en&sort_by=popularity.desc&language={language}";
+            Random rnd = new Random();
+            string apiURL = $"/discover/tv?api_key={apiKey}&with_original_language=en&sort_by=popularity.desc&language={language}&page={rnd.Next(1, 10)}";
 
             using (var client = new HttpClient())
             {
@@ -242,7 +243,7 @@ namespace TubeTrackerAPI.Repositories
             return serieReviewList;
         }
 
-        public async Task<int> SetSerieRating(SerieRating serieRating)
+        public async Task<RatingsDto> SetSerieRating(SerieRating serieRating)
         {
             var ratingQuery = _dbContext.SerieRatings.Where(r => r.SerieId == serieRating.SerieId && r.UserId == serieRating.UserId).FirstOrDefault();
 
@@ -259,7 +260,7 @@ namespace TubeTrackerAPI.Repositories
                 await _dbContext.SaveChangesAsync();
             }
 
-            return ratingQuery.Rating;
+            return await GetSerieRatings(serieRating.UserId, ratingQuery.Serie.SerieApiId);
         }
 
         public async Task<RatingsDto> GetSerieRatings(int userId, int serieApiId)

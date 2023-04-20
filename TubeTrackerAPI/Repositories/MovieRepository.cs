@@ -43,7 +43,8 @@ namespace TubeTrackerAPI.Repositories
 
         public async Task<string> GetMoviePopularList(int page, string language)
         {
-            string apiURL = $"/movie/popular?api_key={apiKey}&language={language}&page={page}";
+            Random rnd = new Random();
+            string apiURL = $"/movie/popular?api_key={apiKey}&language={language}&page={rnd.Next(1, 10)}";
 
             using (var client = new HttpClient())
             {
@@ -194,7 +195,7 @@ namespace TubeTrackerAPI.Repositories
             return movieReviewList;
         }
 
-        public async Task<int> SetMovieRating(MovieRating movieRating)
+        public async Task<RatingsDto> SetMovieRating(MovieRating movieRating)
         {
             var ratingQuery = _dbContext.MovieRatings.Where(r => r.MovieId == movieRating.MovieId && r.UserId == movieRating.UserId).FirstOrDefault();
 
@@ -211,7 +212,7 @@ namespace TubeTrackerAPI.Repositories
                 await _dbContext.SaveChangesAsync();
             }
 
-            return ratingQuery.Rating;
+            return await GetMovieRatings(movieRating.UserId, ratingQuery.Movie.MovieApiId);
         }
 
         public async Task<RatingsDto> GetMovieRatings(int userId, int movieApiId)

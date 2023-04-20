@@ -142,7 +142,7 @@ namespace TubeTrackerAPI.Services
             return serieReviewResponse;
         }
 
-        public async Task<int> SetSerieRating(int serieApiId, int userId, int rating)
+        public async Task<RatingsDto> SetSerieRating(int serieApiId, int userId, int rating)
         {
             SerieRepository serieRepository = new SerieRepository(_dbContext);
 

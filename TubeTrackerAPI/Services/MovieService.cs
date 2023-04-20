@@ -124,7 +124,7 @@ namespace TubeTrackerAPI.Services
             return movieReviewResponse;
         }
 
-        public async Task<int> SetMovieRating(int movieApiId, int userId, int rating)
+        public async Task<RatingsDto> SetMovieRating(int movieApiId, int userId, int rating)
         {
             MovieRepository movieRepository = new MovieRepository(_dbContext);
 
