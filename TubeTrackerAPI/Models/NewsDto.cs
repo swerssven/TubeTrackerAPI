@@ -8,9 +8,7 @@ namespace TubeTrackerAPI.Models
 
         public string creatorNickname { get; set; }
 
-        public string TitleEn { get; set; }
-
-        public string TitleEs { get; set; }
+        public string userImage { get; set; }
 
         public string ContentEn { get; set; }
 

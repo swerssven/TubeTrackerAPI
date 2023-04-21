@@ -32,11 +32,10 @@ namespace TubeTrackerAPI.Repositories
                 .Select(n => new NewsDto()
                 {
                     NewsId = n.NewsId,
-                    TitleEs = n.TitleEs,
-                    TitleEn = n.TitleEn,
                     ContentEs = n.ContentEs,
                     ContentEn = n.ContentEn,
                     creatorNickname = n.User.Nickname,
+                    userImage = n.User.Image,
                     CreationDate = n.CreationDate
                 }).ToListAsync();
 
