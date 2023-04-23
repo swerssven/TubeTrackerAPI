@@ -9,5 +9,7 @@
         public string FriendImage { get; set; }
 
         public int FriendshipStatus { get; set; }
+
+        public int NewMessagesCount { get; set; }
     }
 }

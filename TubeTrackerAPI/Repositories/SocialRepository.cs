@@ -61,6 +61,22 @@ namespace TubeTrackerAPI.Repositories
             return friendList;
         }
 
+        internal async Task<IEnumerable<FriendDto>> GetFriendsWithMessagesList(int userId)
+        {
+            List<int> friendIdList = await _dbContext.Messages.Where(m => m.ReceiverUserId == userId).Select(m => m.SenderUserId).ToListAsync();
+            IEnumerable<FriendDto> friendList = await _dbContext.Friends.Where(f => f.UserId == userId && friendIdList.Contains(f.FriendUserId))
+                .Select(f => new FriendDto()
+                {
+                    UserId = f.FriendUserId,
+                    FriendNickname = f.FriendUser.Nickname,
+                    FriendImage = f.FriendUser.Image,
+                    FriendshipStatus = f.FriendshipStatus,
+                    NewMessagesCount = _dbContext.Messages.Where(m => m.ReceiverUserId == userId && m.IsRead == false).Count()
+                }).ToListAsync();
+
+            return friendList;
+        }
+
         internal async Task<FriendDto> CreateFriendInvitation(int userId, int friendUserId)
         {
             Friend invitation1 = new Friend();

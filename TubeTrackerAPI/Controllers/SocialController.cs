@@ -39,6 +39,16 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await socialService.GetFriendsList(userId));
         }
 
+        //GET api/<SocialController>/getFriendsWithMessagesList?userId=1
+        [Route("friends/getFriendsWithMessagesList")]
+        [HttpGet]
+        public async Task<IActionResult> GetFriendsWithMessagesListAsync([FromQuery] int userId)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.GetFriendsWithMessagesList(userId));
+        }
+
         //POST api/<SocialController>/createFriendInvitation?userId=1&friendUserId=2
         [Route("friends/createFriendInvitation")]
         [HttpPost]
