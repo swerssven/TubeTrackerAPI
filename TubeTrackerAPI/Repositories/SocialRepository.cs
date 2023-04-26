@@ -44,7 +44,7 @@ namespace TubeTrackerAPI.Repositories
                 }
             }
 
-            return UserList;
+            return UserList.OrderBy(f => f.FriendshipStatus);
         }
 
         internal async Task<IEnumerable<FriendDto>> GetFriendsList(int userId)
@@ -56,7 +56,7 @@ namespace TubeTrackerAPI.Repositories
                     FriendNickname = f.FriendUser.Nickname,
                     FriendImage = f.FriendUser.Image,
                     FriendshipStatus = f.FriendshipStatus
-                }).ToListAsync();
+                }).OrderByDescending(f => f.FriendshipStatus).ToListAsync();
 
             return friendList;
         }
@@ -71,7 +71,7 @@ namespace TubeTrackerAPI.Repositories
                     FriendNickname = f.FriendUser.Nickname,
                     FriendImage = f.FriendUser.Image,
                     FriendshipStatus = f.FriendshipStatus,
-                    NewMessagesCount = _dbContext.Messages.Where(m => m.ReceiverUserId == userId && m.IsRead == false).Count()
+                    NewMessagesCount = _dbContext.Messages.Where(m => m.ReceiverUserId == userId && m.SenderUserId == f.FriendUserId && m.IsRead == false).Count()
                 }).ToListAsync();
 
             return friendList;

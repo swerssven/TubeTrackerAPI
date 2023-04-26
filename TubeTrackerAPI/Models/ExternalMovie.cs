@@ -18,5 +18,7 @@ namespace TubeTrackerAPI.Models
         //public bool video { get; set; }
         //public double vote_average { get; set; }
         //public int vote_count { get; set; }
+
+        public bool? watched { get; set; }
     }
 }

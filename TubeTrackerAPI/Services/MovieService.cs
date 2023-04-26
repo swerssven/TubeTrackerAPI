@@ -7,6 +7,7 @@ using TubeTrackerAPI.TubeTrackerEntities;
 using System.Collections;
 using TubeTrackerAPI.Models.Request;
 using Azure.Core;
+using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace TubeTrackerAPI.Services
 {
@@ -14,44 +15,50 @@ namespace TubeTrackerAPI.Services
     {
         private readonly TubeTrackerDbContext _dbContext;
 
+        private MovieRepository _repository;
+
         public MovieService(TubeTrackerDbContext dbContext)
         {
            _dbContext = dbContext;
+            _repository = new MovieRepository(dbContext);
         }
 
-        public async Task<MovieResponse> GetMovieSearchList(string filter, int page, string language)
+        public async Task<MovieResponse> GetMovieSearchList(string filter, int page, string language, int userId)
         {
             string resultStr = await new MovieRepository(this._dbContext).GetMovieSearchList(filter, page, language);
 
             MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
 
+            movieResponse = await _repository.checkWatchedMoviesFromList(movieResponse, userId);
+
             return movieResponse;  
         }
 
-        public async Task<MovieResponse> GetMoviePopularList(int page, string language)
+        public async Task<MovieResponse> GetMoviePopularList(string language, int userId)
         {
-            string resultStr = await new MovieRepository(this._dbContext).GetMoviePopularList(page, language);
+            string resultStr = await new MovieRepository(this._dbContext).GetMoviePopularList(language);
 
             MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
+
+            movieResponse = await _repository.checkWatchedMoviesFromList(movieResponse, userId);
 
             return movieResponse;
         }
 
-        public async Task<MovieResponse> GetMovieTopRatedList(string language)
+        public async Task<MovieResponse> GetMovieTopRatedList(string language, int userId)
         {
-            string resultStr = await new MovieRepository(this._dbContext).GetMovieTopRatedList(language);
+            string resultStr = await _repository.GetMovieTopRatedList(language);
 
             MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
+
+            movieResponse = await _repository.checkWatchedMoviesFromList(movieResponse, userId);
 
             return movieResponse;
         }
 
         public async Task<Movie> CreateMovie(int id, string language)
         {
-
-            MovieRepository movieRepository = new MovieRepository(this._dbContext);
-            
-            string resultStr = await movieRepository.GetMovieExternal(id, language);
+            string resultStr = await _repository.GetMovieExternal(id, language);
 
             ExternalMovieDetails externalMovieDetailsResponse = JsonConvert.DeserializeObject<ExternalMovieDetails>(resultStr);
 
@@ -103,14 +110,12 @@ namespace TubeTrackerAPI.Services
                 movie.TrailerEs = trailer;
             }
 
-            return await movieRepository.CreateMovie(movie); 
+            return await _repository.CreateMovie(movie); 
         }
 
         public async Task<IEnumerable<MovieReviewDto>> GetMovieReviews(int movieApiId)
         {
-            MovieRepository movieRepository = new MovieRepository(_dbContext);
-
-            IEnumerable<MovieReviewDto> movieReviewResponse = await movieRepository.GetMovieReviews(movieApiId);
+            IEnumerable<MovieReviewDto> movieReviewResponse = await _repository.GetMovieReviews(movieApiId);
 
             return movieReviewResponse;
         }
@@ -126,22 +131,30 @@ namespace TubeTrackerAPI.Services
 
         public async Task<RatingsDto> SetMovieRating(int movieApiId, int userId, int rating)
         {
-            MovieRepository movieRepository = new MovieRepository(_dbContext);
-
             MovieRating movieRating = new MovieRating();
 
-            movieRating.MovieId = await movieRepository.getMovieDbId(movieApiId);
+            movieRating.MovieId = await _repository.getMovieDbId(movieApiId);
             movieRating.UserId = userId;
             movieRating.Rating = rating;
 
-            return await movieRepository.SetMovieRating(movieRating);
+            return await _repository.SetMovieRating(movieRating);
         }
 
         public async Task<RatingsDto> GetMovieRatings(int userId, int movieApiId)
         {
-            MovieRepository movieRepository = new MovieRepository(_dbContext);
+            return await _repository.GetMovieRatings(userId, movieApiId);
+        }
 
-            return await movieRepository.GetMovieRatings(userId, movieApiId);
+        public async Task<bool> setMovieWatched(int movieApiId, int userId, string language, bool watched)
+        {
+            var movieId = await _repository.getMovieDbId(movieApiId);
+
+            if (movieId == 0) // Check if movie in database.
+            {
+                await this.CreateMovie(movieApiId, language);
+                movieId = await _repository.getMovieDbId(movieApiId);
+            }
+            return await _repository.setMovieWatched(movieId, userId, watched);
         }
 
     }

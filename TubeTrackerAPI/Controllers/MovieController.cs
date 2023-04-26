@@ -25,25 +25,25 @@ namespace TubeTrackerAPI.Controllers
         // GET api/<MovieController>/getMovieSearchList?filter=Avatar&page=1&language=es-ES
         [Route("getMovieSearchList")]
         [HttpGet]
-        public async Task<IActionResult> GetMovieSearchListAsync([FromQuery]string filter, [FromQuery]int page, [FromQuery]string language)
+        public async Task<IActionResult> GetMovieSearchListAsync([FromQuery]string filter, [FromQuery]int page, [FromQuery]string language, [FromQuery]int userId)
         {
-            return Ok(await new MovieService(_dbContext).GetMovieSearchList(filter, page, language));
+            return Ok(await new MovieService(_dbContext).GetMovieSearchList(filter, page, language, userId));
         }
 
         // GET api/<MovieController>/getMoviePopularList?page=1&language=es-ES
         [Route("getMoviePopularList")]
         [HttpGet]
-        public async Task<IActionResult> GetMoviePopularListAsync([FromQuery] int page, [FromQuery] string language)
+        public async Task<IActionResult> GetMoviePopularListAsync([FromQuery] string language, [FromQuery] int userId)
         {
-            return Ok(await new MovieService(_dbContext).GetMoviePopularList(page, language));
+            return Ok(await new MovieService(_dbContext).GetMoviePopularList(language, userId));
         }
 
         // GET api/<MovieController>getMovieTopRatedList?page=1&language=es-ES
         [Route("getMovieTopRatedList")]
         [HttpGet]
-        public async Task<IActionResult> GetMovieTopRatedListAsync([FromQuery] string language)
+        public async Task<IActionResult> GetMovieTopRatedListAsync([FromQuery] string language, [FromQuery] int userId)
         {
-            return Ok(await new MovieService(_dbContext).GetMovieTopRatedList(language));
+            return Ok(await new MovieService(_dbContext).GetMovieTopRatedList(language, userId));
         }
 
         // GET api/<MovieController>?id=5&language=es-ES
@@ -94,6 +94,16 @@ namespace TubeTrackerAPI.Controllers
             MovieService movieService = new MovieService(this._dbContext);
 
             return Ok(await movieService.GetMovieRatings(userId, movieApiId));
+        }
+
+        // POST api/<MovieController>/setMovieWatched?movieApiId=76600&userId=1&watched=true
+        [Route("setMovieWatched")]
+        [HttpPost]
+        public async Task<IActionResult> setMovieWatched([FromQuery] int movieApiId, [FromQuery] int userId, [FromQuery]string language, [FromQuery] bool watched)
+        {
+            MovieService movieService = new MovieService(_dbContext);
+
+            return Ok(await movieService.setMovieWatched(movieApiId, userId, language, watched));
         }
     }
 }

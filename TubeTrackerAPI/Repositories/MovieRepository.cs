@@ -5,6 +5,9 @@ using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models;
 using Azure.Core;
 using Microsoft.IdentityModel.Tokens;
+using MessagePack.Formatters;
+using NuGet.Protocol.Core.Types;
+using TubeTrackerAPI.Models.Response;
 
 namespace TubeTrackerAPI.Repositories
 {
@@ -41,10 +44,10 @@ namespace TubeTrackerAPI.Repositories
             }
         }
 
-        public async Task<string> GetMoviePopularList(int page, string language)
+        public async Task<string> GetMoviePopularList(string language)
         {
             Random rnd = new Random();
-            string apiURL = $"/movie/popular?api_key={apiKey}&language={language}&page={rnd.Next(1, 10)}";
+            string apiURL = $"/movie/popular?api_key={apiKey}&language={language}&page={rnd.Next(1, 5)}";
 
             using (var client = new HttpClient())
             {
@@ -65,7 +68,7 @@ namespace TubeTrackerAPI.Repositories
         public async Task<string> GetMovieTopRatedList(string language)
         {
             Random rnd = new Random();
-            string apiURL = $"/movie/top_rated?api_key={apiKey}&language={language}&page={rnd.Next(1, 10)}";
+            string apiURL = $"/movie/top_rated?api_key={apiKey}&language={language}&page={rnd.Next(1, 5)}";
 
             using (var client = new HttpClient())
             {
@@ -235,11 +238,64 @@ namespace TubeTrackerAPI.Repositories
             return ratingsDto;
         }
 
+        public async Task<bool> setMovieWatched(int movieId, int userId, bool watched)
+        {
+            bool result = watched;
+
+            if (watched)
+            {
+                WatchedMovie watchedMovie = new WatchedMovie();
+                watchedMovie.MovieId = movieId;
+                watchedMovie.UserId = userId;
+                watchedMovie.DateWatched = DateTime.Now;
+
+                _dbContext.WatchedMovies.Add(watchedMovie);
+                await _dbContext.SaveChangesAsync();
+                result = true;
+            }
+            else if (!watched)
+            {
+                var watchedMovieQuery = await _dbContext.WatchedMovies.Where(w => w.MovieId == movieId && w.UserId == userId).FirstOrDefaultAsync();
+                _dbContext.WatchedMovies.Remove(watchedMovieQuery);
+                await _dbContext.SaveChangesAsync();
+                result = false;
+            }
+
+            return result;
+        }
+
         public async Task<int> getMovieDbId(int movieApiId)
         {
             var movie = await _dbContext.Movies.Where(m => m.MovieApiId == movieApiId).FirstOrDefaultAsync();
 
+            if (movie == null)
+            {
+                return 0;
+            }
+
             return movie.MovieId;
+        }
+
+        // Check if movies is watched by specific user.
+        public async Task<MovieResponse> checkWatchedMoviesFromList(MovieResponse movieResponse, int userId)
+        {
+            foreach (var movie in movieResponse.Results)
+            {
+                var movieId = await this.getMovieDbId(movie.id);
+
+                var watchedQuery = await _dbContext.WatchedMovies.Where(w => w.MovieId == movieId && w.UserId == userId).FirstOrDefaultAsync();
+
+                if (watchedQuery != null)
+                {
+                    movie.watched = true;
+                }
+                else
+                {
+                    movie.watched = false;
+                }
+            }
+
+            return movieResponse;
         }
     }
 }
