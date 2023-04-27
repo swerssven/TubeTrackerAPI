@@ -17,9 +17,9 @@
         //public List<Crew> crew { get; set; }
         //public List<GuestStar> guest_stars { get; set; }
 
-        public bool Watched { get; set; }
+        public bool watched { get; set; }
 
-        public bool Favorite { get; set; }
+        public bool favorite { get; set; }
     }
     /*public class ExternalSeasonsList
     {

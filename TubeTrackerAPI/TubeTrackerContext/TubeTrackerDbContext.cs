@@ -423,12 +423,11 @@ public partial class TubeTrackerDbContext : DbContext
 
             entity.Property(e => e.DateWatched).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Serie).WithMany(p => p.WatchedSeriesSeasonsEpisodes)
-                .HasForeignKey(d => d.SerieId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_WatchedSeriesSeasonsEpisodes_SeasonsEpisodes_SeasonsEpisodesId");
+            entity.HasOne(d => d.SeasonsEpisodes).WithMany(p => p.WatchedSeriesSeasonsEpisodes)
+                .HasForeignKey(d => d.SeasonsEpisodesId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.SerieNavigation).WithMany(p => p.WatchedSeriesSeasonsEpisodes)
+            entity.HasOne(d => d.Serie).WithMany(p => p.WatchedSeriesSeasonsEpisodes)
                 .HasForeignKey(d => d.SerieId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 

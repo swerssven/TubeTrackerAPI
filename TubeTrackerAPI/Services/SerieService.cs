@@ -20,11 +20,13 @@ namespace TubeTrackerAPI.Services
             _repository = new SerieRepository(dbContext);
         }
 
-        public async Task<SerieResponse> GetSerieSearchList(string filter, int page, string language)
+        public async Task<SerieResponse> GetSerieSearchList(string filter, int page, string language, int userId)
         {
             string resultStr = await new SerieRepository(this._dbContext).GetSerieSearchList(filter, page, language);
 
             SerieResponse serieResponse = JsonConvert.DeserializeObject<SerieResponse>(resultStr);
+
+            serieResponse = await _repository.checkWatchedAndFavoriteSeriesFromList(serieResponse, userId);
 
             return serieResponse;
         }

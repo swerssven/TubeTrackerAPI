@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Request;
+using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
 
@@ -324,7 +325,47 @@ namespace TubeTrackerAPI.Repositories
         {
             var serie = await _dbContext.Series.Where(m => m.SerieApiId == serieApiId).FirstOrDefaultAsync();
 
+            if (serie == null)
+            {
+                return 0;
+            }
+
             return serie.SerieId;
+        }
+
+        // Check if serie is watched by specific user.
+        public async Task<SerieResponse> checkWatchedAndFavoriteSeriesFromList(SerieResponse serieResponse, int userId)
+        {
+            foreach (var serie in serieResponse.Results)
+            {
+                var serieId = await this.getSerieDbId(serie.id);
+
+                int episodeCount = await _dbContext.SeasonsEpisodes.CountAsync(s => s.SerieId == serieId);
+
+                int watchedEpisodeCount = await _dbContext.WatchedSeriesSeasonsEpisodes.CountAsync(w => w.SerieId == serieId && w.UserId == userId);
+
+                if (episodeCount == watchedEpisodeCount && episodeCount > 0)
+                {
+                    serie.watched = true;
+                }
+                else
+                {
+                    serie.watched = false;
+                }
+
+                var favoriteQuery = await _dbContext.FavoriteSeries.Where(w => w.SerieId == serieId && w.UserId == userId).FirstOrDefaultAsync();
+
+                if (favoriteQuery != null)
+                {
+                    serie.favorite = true;
+                }
+                else
+                {
+                    serie.favorite = false;
+                }
+            }
+
+            return serieResponse;
         }
     }
 }

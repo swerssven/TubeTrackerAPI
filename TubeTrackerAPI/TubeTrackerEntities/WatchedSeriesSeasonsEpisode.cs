@@ -13,9 +13,9 @@ public partial class WatchedSeriesSeasonsEpisode
 
     public DateTime DateWatched { get; set; }
 
-    public virtual SeasonsEpisode Serie { get; set; }
+    public virtual SeasonsEpisode SeasonsEpisodes { get; set; }
 
-    public virtual Series SerieNavigation { get; set; }
+    public virtual Series Serie { get; set; }
 
     public virtual User User { get; set; }
 }

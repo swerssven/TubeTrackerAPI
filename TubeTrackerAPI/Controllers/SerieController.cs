@@ -23,9 +23,9 @@ namespace TubeTrackerAPI.Controllers
         // GET api/<SerieController>/getSerieSearchList?filter=BigBang&page=1&language=es-ES
         [Route("getSerieSearchList")]
         [HttpGet]
-        public async Task<IActionResult> GetSerieSearchListAsync([FromQuery] string filter, [FromQuery] int page, [FromQuery] string language)
+        public async Task<IActionResult> GetSerieSearchListAsync([FromQuery] string filter, [FromQuery] int page, [FromQuery] string language, [FromQuery] int userId)
         {
-            return Ok(await new SerieService(_dbContext).GetSerieSearchList(filter, page, language));
+            return Ok(await new SerieService(_dbContext).GetSerieSearchList(filter, page, language, userId));
         }
 
         // GET api/<SerieController>/getSeriePopularListt?page=1&language=es-ES
