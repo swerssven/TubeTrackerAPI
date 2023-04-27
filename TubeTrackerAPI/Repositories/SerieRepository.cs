@@ -283,6 +283,43 @@ namespace TubeTrackerAPI.Repositories
             return ratingsDto;
         }
 
+        public async Task<bool> setSerieWatched(int serieId, int userId, bool watched)
+        {
+            bool result = watched;
+
+            if (watched) // If true we save watched episodes.
+            {
+
+                List<SeasonsEpisode> episodes = await _dbContext.SeasonsEpisodes.Where(s => s.SerieId == serieId).ToListAsync();
+                List<WatchedSeriesSeasonsEpisode> watchedEpisodes = await _dbContext.WatchedSeriesSeasonsEpisodes.Where(s => s.SerieId == serieId && s.UserId == userId).ToListAsync();
+
+                foreach (var episode in episodes)
+                {
+                    if (!watchedEpisodes.Any(s => s.SeasonsEpisodesId == episode.SeasonsEpisodesId))
+                    {
+                        WatchedSeriesSeasonsEpisode watchedSeriesSeasonsEpisode = new WatchedSeriesSeasonsEpisode();
+                        watchedSeriesSeasonsEpisode.SerieId = serieId;
+                        watchedSeriesSeasonsEpisode.UserId = userId;
+                        watchedSeriesSeasonsEpisode.DateWatched = DateTime.Now;
+                        watchedSeriesSeasonsEpisode.SeasonsEpisodesId = episode.SeasonsEpisodesId;
+                        _dbContext.WatchedSeriesSeasonsEpisodes.Add(watchedSeriesSeasonsEpisode);
+                    }   
+                }
+
+                await _dbContext.SaveChangesAsync();
+                result = true;
+            }
+            else if (!watched)  // If false we remove watched episodes.
+            { 
+                List<WatchedSeriesSeasonsEpisode> watchedEpisodes = await _dbContext.WatchedSeriesSeasonsEpisodes.Where(w => w.SerieId == serieId && w.UserId == userId).ToListAsync();
+                _dbContext.WatchedSeriesSeasonsEpisodes.RemoveRange(watchedEpisodes);
+                await _dbContext.SaveChangesAsync();
+                result = false;
+            }
+
+            return result;
+        }
+
         public async Task<int> getSerieDbId(int serieApiId)
         {
             var serie = await _dbContext.Series.Where(m => m.SerieApiId == serieApiId).FirstOrDefaultAsync();

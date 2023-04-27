@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NuGet.Protocol.Core.Types;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
@@ -11,10 +12,12 @@ namespace TubeTrackerAPI.Services
     public class SerieService
     {
         private readonly TubeTrackerDbContext _dbContext;
+        private readonly SerieRepository _repository;
 
         public SerieService(TubeTrackerDbContext dbContext)
         {
             _dbContext = dbContext;
+            _repository = new SerieRepository(dbContext);
         }
 
         public async Task<SerieResponse> GetSerieSearchList(string filter, int page, string language)
@@ -160,6 +163,18 @@ namespace TubeTrackerAPI.Services
             SerieRepository serieRepository = new SerieRepository(_dbContext);
 
             return await serieRepository.GetSerieRatings(userId, serieApiId);
+        }
+
+        public async Task<bool> setSerieWatched(int serieApiId, int userId, string language, bool watched)
+        {
+            var serieId = await _repository.getSerieDbId(serieApiId);
+
+            if (serieId == 0) // Check if serie in database, if not, it will be created.
+            {
+                await this.CreateSerie(serieApiId, language);
+                serieId = await _repository.getSerieDbId(serieApiId);
+            }
+            return await _repository.setSerieWatched(serieId, userId, watched);
         }
     }
 }

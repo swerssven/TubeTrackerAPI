@@ -16,6 +16,10 @@
         //public int vote_count { get; set; }
         //public List<Crew> crew { get; set; }
         //public List<GuestStar> guest_stars { get; set; }
+
+        public bool Watched { get; set; }
+
+        public bool Favorite { get; set; }
     }
     /*public class ExternalSeasonsList
     {

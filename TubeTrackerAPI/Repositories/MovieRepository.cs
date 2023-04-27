@@ -1,13 +1,10 @@
-﻿using TubeTrackerAPI.TubeTrackerContext;
-using TubeTrackerAPI.TubeTrackerEntities;
-using Microsoft.EntityFrameworkCore;
-using TubeTrackerAPI.Models.Request;
-using TubeTrackerAPI.Models;
-using Azure.Core;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MessagePack.Formatters;
-using NuGet.Protocol.Core.Types;
+using TubeTrackerAPI.Models;
+using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
+using TubeTrackerAPI.TubeTrackerContext;
+using TubeTrackerAPI.TubeTrackerEntities;
 
 namespace TubeTrackerAPI.Repositories
 {
@@ -264,6 +261,34 @@ namespace TubeTrackerAPI.Repositories
             return result;
         }
 
+        // Mark/unmark movie as favorite.
+        public async Task<bool> setMovieFavorite(int movieId, int userId, bool isFavorite)
+        {
+            bool result = isFavorite;
+
+            if (isFavorite)
+            {
+                FavoriteMovie favoriteMovie = new FavoriteMovie();
+                favoriteMovie.MovieId = movieId;
+                favoriteMovie.UserId = userId;
+                favoriteMovie.DateAdded = DateTime.Now;
+
+                _dbContext.FavoriteMovies.Add(favoriteMovie);
+                await _dbContext.SaveChangesAsync();
+                result = true;
+            }
+            else if (!isFavorite)
+            {
+                var favoriteMovieQuery = await _dbContext.FavoriteMovies.Where(f => f.MovieId == movieId && f.UserId == userId).FirstOrDefaultAsync();
+                _dbContext.FavoriteMovies.Remove(favoriteMovieQuery);
+                await _dbContext.SaveChangesAsync();
+                result = false;
+            }
+
+            return result;
+        }
+
+        // Get's database id with the external api id.
         public async Task<int> getMovieDbId(int movieApiId)
         {
             var movie = await _dbContext.Movies.Where(m => m.MovieApiId == movieApiId).FirstOrDefaultAsync();
@@ -277,7 +302,7 @@ namespace TubeTrackerAPI.Repositories
         }
 
         // Check if movies is watched by specific user.
-        public async Task<MovieResponse> checkWatchedMoviesFromList(MovieResponse movieResponse, int userId)
+        public async Task<MovieResponse> checkWatchedAndFavoriteMoviesFromList(MovieResponse movieResponse, int userId)
         {
             foreach (var movie in movieResponse.Results)
             {
@@ -292,6 +317,17 @@ namespace TubeTrackerAPI.Repositories
                 else
                 {
                     movie.watched = false;
+                }
+
+                var favoriteQuery = await _dbContext.FavoriteMovies.Where(w => w.MovieId == movieId && w.UserId == userId).FirstOrDefaultAsync();
+
+                if (favoriteQuery != null)
+                {
+                    movie.favorite = true;
+                }
+                else
+                {
+                    movie.favorite = false;
                 }
             }
 

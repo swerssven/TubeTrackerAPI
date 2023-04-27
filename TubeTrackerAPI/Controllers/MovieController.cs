@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TubeTrackerAPI.Services;
-using TubeTrackerAPI.Middleware;
-using Microsoft.EntityFrameworkCore;
 using TubeTrackerAPI.TubeTrackerContext;
-using TubeTrackerAPI.Repositories;
 using TubeTrackerAPI.Models.Request;
 
 namespace TubeTrackerAPI.Controllers
@@ -104,6 +101,16 @@ namespace TubeTrackerAPI.Controllers
             MovieService movieService = new MovieService(_dbContext);
 
             return Ok(await movieService.setMovieWatched(movieApiId, userId, language, watched));
+        }
+
+        // POST api/<MovieController>/setMovieFavorite?movieApiId=76600&userId=1&favorite=true
+        [Route("setMovieFavorite")]
+        [HttpPost]
+        public async Task<IActionResult> setMovieFavorite([FromQuery] int movieApiId, [FromQuery] int userId, [FromQuery] string language, [FromQuery] bool favorite)
+        {
+            MovieService movieService = new MovieService(_dbContext);
+
+            return Ok(await movieService.setMovieFavorite(movieApiId, userId, language, favorite));
         }
     }
 }

@@ -93,5 +93,15 @@ namespace TubeTrackerAPI.Controllers
 
             return Ok(await serieService.GetSerieRatings(userId, serieApiId));
         }
+
+        // POST api/<SerieController>/setSerieWatched?serieApiId=76600&userId=1&watched=true
+        [Route("setSerieWatched")]
+        [HttpPost]
+        public async Task<IActionResult> setSerieWatched([FromQuery] int serieApiId, [FromQuery] int userId, [FromQuery] string language, [FromQuery] bool watched)
+        {
+            SerieService serieService = new SerieService(_dbContext);
+
+            return Ok(await serieService.setSerieWatched(serieApiId, userId, language, watched));
+        }
     }
 }

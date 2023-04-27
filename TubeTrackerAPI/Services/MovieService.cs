@@ -1,13 +1,10 @@
 ﻿using Newtonsoft.Json;
-using TubeTrackerAPI.Repositories;
-using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.Models;
+using TubeTrackerAPI.Models.Request;
+using TubeTrackerAPI.Models.Response;
+using TubeTrackerAPI.Repositories;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
-using System.Collections;
-using TubeTrackerAPI.Models.Request;
-using Azure.Core;
-using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace TubeTrackerAPI.Services
 {
@@ -15,11 +12,11 @@ namespace TubeTrackerAPI.Services
     {
         private readonly TubeTrackerDbContext _dbContext;
 
-        private MovieRepository _repository;
+        private readonly MovieRepository _repository;
 
         public MovieService(TubeTrackerDbContext dbContext)
         {
-           _dbContext = dbContext;
+            _dbContext = dbContext;
             _repository = new MovieRepository(dbContext);
         }
 
@@ -29,7 +26,7 @@ namespace TubeTrackerAPI.Services
 
             MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
 
-            movieResponse = await _repository.checkWatchedMoviesFromList(movieResponse, userId);
+            movieResponse = await _repository.checkWatchedAndFavoriteMoviesFromList(movieResponse, userId);
 
             return movieResponse;  
         }
@@ -40,7 +37,7 @@ namespace TubeTrackerAPI.Services
 
             MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
 
-            movieResponse = await _repository.checkWatchedMoviesFromList(movieResponse, userId);
+            movieResponse = await _repository.checkWatchedAndFavoriteMoviesFromList(movieResponse, userId);
 
             return movieResponse;
         }
@@ -51,7 +48,7 @@ namespace TubeTrackerAPI.Services
 
             MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
 
-            movieResponse = await _repository.checkWatchedMoviesFromList(movieResponse, userId);
+            movieResponse = await _repository.checkWatchedAndFavoriteMoviesFromList(movieResponse, userId);
 
             return movieResponse;
         }
@@ -149,12 +146,24 @@ namespace TubeTrackerAPI.Services
         {
             var movieId = await _repository.getMovieDbId(movieApiId);
 
-            if (movieId == 0) // Check if movie in database.
+            if (movieId == 0) // Check if movie in database, if not, it will be created.
             {
                 await this.CreateMovie(movieApiId, language);
                 movieId = await _repository.getMovieDbId(movieApiId);
             }
             return await _repository.setMovieWatched(movieId, userId, watched);
+        }
+
+        public async Task<bool> setMovieFavorite(int movieApiId, int userId, string language, bool favorite)
+        {
+            var movieId = await _repository.getMovieDbId(movieApiId);
+
+            if (movieId == 0) // Check if movie in database, if not, it will be created.
+            {
+                await this.CreateMovie(movieApiId, language);
+                movieId = await _repository.getMovieDbId(movieApiId);
+            }
+            return await _repository.setMovieFavorite(movieId, userId, favorite);
         }
 
     }

@@ -20,5 +20,7 @@ namespace TubeTrackerAPI.Models
         //public int vote_count { get; set; }
 
         public bool? watched { get; set; }
+
+        public bool? favorite { get; set; }
     }
 }
