@@ -46,11 +46,11 @@ namespace TubeTrackerAPI.Controllers
         // GET api/<MovieController>?id=5&language=es-ES
         [Route("getMovie")]
         [HttpGet]
-        public async Task<IActionResult> GetMovieAsync([FromQuery] int id, [FromQuery] string language)
+        public async Task<IActionResult> GetMovieAsync([FromQuery] int id, [FromQuery] string language, [FromQuery] int userId)
         {
             MovieService movieService = new MovieService(this._dbContext);
             
-            return Ok(await movieService.CreateMovie(id, language));
+            return Ok(await movieService.CreateMovie(id, language, userId));
         }
 
         // GET api/<MovieController>/getReviews?movieApiId=5

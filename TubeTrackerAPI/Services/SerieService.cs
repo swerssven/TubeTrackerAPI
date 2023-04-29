@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using NuGet.Protocol.Core.Types;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
@@ -31,25 +30,29 @@ namespace TubeTrackerAPI.Services
             return serieResponse;
         }
 
-        public async Task<SerieResponse> GetSeriePopularList(int page, string language)
+        public async Task<SerieResponse> GetSeriePopularList(string language, int userId)
         {
-            string resultStr = await new SerieRepository(this._dbContext).GetSeriePopularList(page, language);
+            string resultStr = await new SerieRepository(this._dbContext).GetSeriePopularList(language);
 
             SerieResponse serieResponse = JsonConvert.DeserializeObject<SerieResponse>(resultStr);
+
+            serieResponse = await _repository.checkWatchedAndFavoriteSeriesFromList(serieResponse, userId);
 
             return serieResponse;
         }
 
-        public async Task<SerieResponse> GetSerieTopRatedList(string language)
+        public async Task<SerieResponse> GetSerieTopRatedList(string language, int userId)
         {
             string resultStr = await new SerieRepository(this._dbContext).GetSerieTopRatedList(language);
 
             SerieResponse serieResponse = JsonConvert.DeserializeObject<SerieResponse>(resultStr);
 
+            serieResponse = await _repository.checkWatchedAndFavoriteSeriesFromList(serieResponse, userId);
+
             return serieResponse;
         }
 
-        public async Task<Series> CreateSerie(int id, string language)
+        public async Task<SerieDto> CreateSerie(int id, string language, int userId)
         {
 
             SerieRepository serieRepository = new SerieRepository(this._dbContext);
@@ -66,10 +69,14 @@ namespace TubeTrackerAPI.Services
                 for (int numEpisode = 0; numEpisode < externalSeasonsDetails.episodes.Count(); numEpisode++)
                 {
                     SeasonsEpisode seasonsEpisode = new SeasonsEpisode();
-                    seasonsEpisode.NumSeason = numSeason;
+                    seasonsEpisode.NumSeason = externalSeasonsDetails.season_number;
                     seasonsEpisode.NumEpisode = externalSeasonsDetails.episodes.ElementAt(numEpisode).episode_number;
                     seasonsEpisode.EpisodeDuration = externalSeasonsDetails.episodes.ElementAt(numEpisode).runtime;
-                    seasonsEpisode.PremiereDate = DateTimeOffset.Parse(externalSeasonsDetails.episodes.ElementAt(numEpisode).air_date).UtcDateTime;
+
+                    if (!string.IsNullOrWhiteSpace(externalSeasonsDetails.episodes.ElementAt(numEpisode).air_date))
+                    {
+                        seasonsEpisode.PremiereDate = DateTimeOffset.Parse(externalSeasonsDetails.episodes.ElementAt(numEpisode).air_date).UtcDateTime;
+                    }
 
                     if (language == "en-EN")
                     {
@@ -126,23 +133,23 @@ namespace TubeTrackerAPI.Services
                 serie.GenresEs = genres;
             }
 
-            return await serieRepository.CreateSerie(serie, seasonsEpisodesList);
+            return await serieRepository.CreateSerie(serie, seasonsEpisodesList, userId);
         }
 
-        public async Task<IEnumerable<SerieReviewDto>> GetSerieReviews(int serieApiId)
+        public async Task<SerieReviewDto> GetSerieReviews(int serieApiId)
         {
             SerieRepository serieRepository = new SerieRepository(_dbContext);
 
-            IEnumerable<SerieReviewDto> serieReviewResponse = await serieRepository.GetSerieReviews(serieApiId);
+            SerieReviewDto serieReviewResponse = await serieRepository.GetSerieReviews(serieApiId);
 
             return serieReviewResponse;
         }
 
-        public async Task<IEnumerable<SerieReviewDto>> CreateSerieReviewList(CreateSerieReviewListRequest request)
+        public async Task<SerieReviewDto> CreateSerieReviewList(CreateSerieReviewListRequest request)
         {
             SerieRepository serieRepository = new SerieRepository(_dbContext);
 
-            IEnumerable<SerieReviewDto> serieReviewResponse = await serieRepository.CreateSerieReviewList(request);
+            SerieReviewDto serieReviewResponse = await serieRepository.CreateSerieReviewList(request);
 
             return serieReviewResponse;
         }
@@ -173,10 +180,29 @@ namespace TubeTrackerAPI.Services
 
             if (serieId == 0) // Check if serie in database, if not, it will be created.
             {
-                await this.CreateSerie(serieApiId, language);
+                await this.CreateSerie(serieApiId, language, userId);
                 serieId = await _repository.getSerieDbId(serieApiId);
             }
             return await _repository.setSerieWatched(serieId, userId, watched);
+        }
+
+        public async Task<bool> setSeasonEpisodeWatched(int serieApiId, int seasonsEpisodeId, int userId, bool watched)
+        {
+            var serieId = await _repository.getSerieDbId(serieApiId);
+
+            return await _repository.setSeasonEpisodeWatched(serieId, seasonsEpisodeId, userId, watched);
+        }
+
+        public async Task<bool> setSerieFavorite(int serieApiId, int userId, string language, bool favorite)
+        {
+            var serieId = await _repository.getSerieDbId(serieApiId);
+
+            if (serieId == 0) // Check if serie in database, if not, it will be created.
+            {
+                await this.CreateSerie(serieApiId, language, userId);
+                serieId = await _repository.getSerieDbId(serieApiId);
+            }
+            return await _repository.setSerieFavorite(serieId, userId, favorite);
         }
     }
 }

@@ -84,7 +84,7 @@ namespace TubeTrackerAPI.Repositories
         }
 
         // Create new movie in data base
-        public async Task<Movie> CreateMovie(Movie movie)
+        public async Task<MovieDto> CreateMovie(Movie movie, int userId)
         {
             var MovieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == movie.MovieApiId).FirstOrDefaultAsync();
             //MovieQuery = (from m in _dbContext.Movies where m.MovieApiId == movie.MovieApiId select m).FirstOrDefault();
@@ -114,8 +114,27 @@ namespace TubeTrackerAPI.Repositories
                 await _dbContext.SaveChangesAsync();
             }
 
-            return MovieQuery;
+            MovieDto movieDto = new MovieDto();
+            movieDto.MovieId = MovieQuery.MovieId;
+            movieDto.MovieApiId = MovieQuery.MovieApiId;
+            movieDto.TitleEn = MovieQuery.TitleEn;
+            movieDto.TitleEs = MovieQuery.TitleEs;
+            movieDto.DescriptionEn = MovieQuery.DescriptionEn;
+            movieDto.DescriptionEs = MovieQuery.DescriptionEs;
+            movieDto.Actors = MovieQuery.Actors;
+            movieDto.Directors = MovieQuery.Directors;
+            movieDto.GenresEn = MovieQuery.GenresEn;
+            movieDto.GenresEs = MovieQuery.GenresEs;
+            movieDto.PremiereDate = MovieQuery.PremiereDate;
+            movieDto.Poster = MovieQuery.Poster;
+            movieDto.Backdrop = MovieQuery.Backdrop;
+            movieDto.Duration = MovieQuery.Duration;
+            movieDto.TrailerEs = MovieQuery.TrailerEs;
+            movieDto.TrailerEn = MovieQuery.TrailerEn;
+            await this.checkWatchedAndFavoriteMovie(movieDto, userId);
 
+
+            return movieDto;
         }
 
         // Gets a movie from external API
@@ -139,12 +158,14 @@ namespace TubeTrackerAPI.Repositories
             }
         }
 
-        public async Task<IEnumerable<MovieReviewDto>> GetMovieReviews(int movieApiId)
+        public async Task<MovieReviewDto> GetMovieReviews(int movieApiId)
         {
             var movieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == movieApiId).FirstOrDefaultAsync();
 
-            List<MovieReviewDto> movieReviewList = await _dbContext.MovieReviews.Where(m => m.MovieId == movieQuery.MovieId)
-                .Select(m => new MovieReviewDto()
+            MovieReviewDto movieReviewDto = new MovieReviewDto();
+
+            movieReviewDto.reviews = await _dbContext.MovieReviews.Where(m => m.MovieId == movieQuery.MovieId)
+                .Select(m => new MovieReviewItemDto()
                 {
                     MovieReviewId = m.MovieReviewId,
                     Content = m.Content,
@@ -154,10 +175,12 @@ namespace TubeTrackerAPI.Repositories
                     CreationDate = m.CreationDate
                 }).ToListAsync();
 
-            return movieReviewList;
+            movieReviewDto.numReviews = await _dbContext.MovieReviews.CountAsync(m => m.MovieId == movieQuery.MovieId);
+
+            return movieReviewDto;
         }
 
-        public async Task<IEnumerable<MovieReviewDto>> CreateMovieReviewList(CreateMovieReviewListRequest request)
+        public async Task<MovieReviewDto> CreateMovieReviewList(CreateMovieReviewListRequest request)
         {
             var movieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == request.MovieApiId).FirstOrDefaultAsync();
             var reviewQuery = movieQuery.MovieReviews.Where(m => m.UserId == request.UserId).FirstOrDefault();
@@ -181,8 +204,10 @@ namespace TubeTrackerAPI.Repositories
                 await _dbContext.SaveChangesAsync();
             }
 
-            List<MovieReviewDto> movieReviewList = await _dbContext.MovieReviews.Where(m => m.MovieId == movieQuery.MovieId)
-                .Select(m => new MovieReviewDto()
+            MovieReviewDto movieReviewDto = new MovieReviewDto();
+
+            movieReviewDto.reviews = await _dbContext.MovieReviews.Where(m => m.MovieId == movieQuery.MovieId)
+                .Select(m => new MovieReviewItemDto()
                 {
                     MovieReviewId = m.MovieReviewId,
                     Content = m.Content,
@@ -192,7 +217,9 @@ namespace TubeTrackerAPI.Repositories
                     CreationDate = m.CreationDate
                 }).ToListAsync();
 
-            return movieReviewList;
+            movieReviewDto.numReviews = await _dbContext.MovieReviews.CountAsync(m => m.MovieId == movieQuery.MovieId);
+
+            return movieReviewDto;
         }
 
         public async Task<RatingsDto> SetMovieRating(MovieRating movieRating)
@@ -301,7 +328,7 @@ namespace TubeTrackerAPI.Repositories
             return movie.MovieId;
         }
 
-        // Check if movies is watched by specific user.
+        // Check if a movies list is watched and favorited by specific user.
         public async Task<MovieResponse> checkWatchedAndFavoriteMoviesFromList(MovieResponse movieResponse, int userId)
         {
             foreach (var movie in movieResponse.Results)
@@ -332,6 +359,36 @@ namespace TubeTrackerAPI.Repositories
             }
 
             return movieResponse;
+        }
+
+        // Check if movie is watched and favorited by specific user.
+        public async Task<MovieDto> checkWatchedAndFavoriteMovie(MovieDto movie, int userId)
+        {
+            var movieId = await this.getMovieDbId(movie.MovieApiId);
+
+            var watchedQuery = await _dbContext.WatchedMovies.Where(w => w.MovieId == movieId && w.UserId == userId).FirstOrDefaultAsync();
+
+            if (watchedQuery != null)
+            {
+                movie.watched = true;
+            }
+            else
+            {
+                movie.watched = false;
+            }
+
+            var favoriteQuery = await _dbContext.FavoriteMovies.Where(w => w.MovieId == movieId && w.UserId == userId).FirstOrDefaultAsync();
+
+            if (favoriteQuery != null)
+            {
+                movie.favorite = true;
+            }
+            else
+            {
+                movie.favorite = false;
+            }
+
+            return movie;
         }
     }
 }

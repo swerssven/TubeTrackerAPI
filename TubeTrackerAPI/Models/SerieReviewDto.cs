@@ -1,6 +1,6 @@
 ﻿namespace TubeTrackerAPI.Models
 {
-    public class SerieReviewDto
+    public class SerieReviewItemDto
     {
         public int SerieReviewId { get; set; }
 
@@ -15,5 +15,12 @@
         public string Content { get; set; }
 
         public DateTime CreationDate { get; set; }
+    }
+
+    public class SerieReviewDto
+    {
+        public int numReviews { get; set; }
+
+        public List<SerieReviewItemDto> reviews { get; set; }
     }
 }

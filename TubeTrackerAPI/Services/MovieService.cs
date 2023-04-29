@@ -53,7 +53,7 @@ namespace TubeTrackerAPI.Services
             return movieResponse;
         }
 
-        public async Task<Movie> CreateMovie(int id, string language)
+        public async Task<MovieDto> CreateMovie(int id, string language, int userId)
         {
             string resultStr = await _repository.GetMovieExternal(id, language);
 
@@ -107,21 +107,21 @@ namespace TubeTrackerAPI.Services
                 movie.TrailerEs = trailer;
             }
 
-            return await _repository.CreateMovie(movie); 
+            return await _repository.CreateMovie(movie, userId); 
         }
 
-        public async Task<IEnumerable<MovieReviewDto>> GetMovieReviews(int movieApiId)
+        public async Task<MovieReviewDto> GetMovieReviews(int movieApiId)
         {
-            IEnumerable<MovieReviewDto> movieReviewResponse = await _repository.GetMovieReviews(movieApiId);
+            MovieReviewDto movieReviewResponse = await _repository.GetMovieReviews(movieApiId);
 
             return movieReviewResponse;
         }
         
-        public async Task<IEnumerable<MovieReviewDto>> CreateMovieReviewList(CreateMovieReviewListRequest request)
+        public async Task<MovieReviewDto> CreateMovieReviewList(CreateMovieReviewListRequest request)
         {
             MovieRepository movieRepository = new MovieRepository(_dbContext);
 
-            IEnumerable<MovieReviewDto> movieReviewResponse = await movieRepository.CreateMovieReviewList(request);
+            MovieReviewDto movieReviewResponse = await movieRepository.CreateMovieReviewList(request);
 
             return movieReviewResponse;
         }
@@ -148,7 +148,7 @@ namespace TubeTrackerAPI.Services
 
             if (movieId == 0) // Check if movie in database, if not, it will be created.
             {
-                await this.CreateMovie(movieApiId, language);
+                await this.CreateMovie(movieApiId, language, userId);
                 movieId = await _repository.getMovieDbId(movieApiId);
             }
             return await _repository.setMovieWatched(movieId, userId, watched);
@@ -160,7 +160,7 @@ namespace TubeTrackerAPI.Services
 
             if (movieId == 0) // Check if movie in database, if not, it will be created.
             {
-                await this.CreateMovie(movieApiId, language);
+                await this.CreateMovie(movieApiId, language, userId);
                 movieId = await _repository.getMovieDbId(movieApiId);
             }
             return await _repository.setMovieFavorite(movieId, userId, favorite);

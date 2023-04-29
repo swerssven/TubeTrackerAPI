@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Services;
 using TubeTrackerAPI.TubeTrackerContext;
+using TubeTrackerAPI.TubeTrackerEntities;
 
 namespace TubeTrackerAPI.Controllers
 {
@@ -31,27 +30,27 @@ namespace TubeTrackerAPI.Controllers
         // GET api/<SerieController>/getSeriePopularListt?page=1&language=es-ES
         [Route("getSeriePopularList")]
         [HttpGet]
-        public async Task<IActionResult> GetSeriePopularListAsync([FromQuery] int page, [FromQuery] string language)
+        public async Task<IActionResult> GetSeriePopularListAsync([FromQuery] string language, [FromQuery] int userId)
         {
-            return Ok(await new SerieService(_dbContext).GetSeriePopularList(page, language));
+            return Ok(await new SerieService(_dbContext).GetSeriePopularList(language, userId));
         }
 
         // GET api/<SerieController>/getSerieTopRatedList?page=1&language=es-ES
         [Route("getSerieTopRatedList")]
         [HttpGet]
-        public async Task<IActionResult> GetSerieTopRatedListAsync([FromQuery] string language)
+        public async Task<IActionResult> GetSerieTopRatedListAsync([FromQuery] string language, [FromQuery] int userId)
         {
-            return Ok(await new SerieService(_dbContext).GetSerieTopRatedList(language));
+            return Ok(await new SerieService(_dbContext).GetSerieTopRatedList(language, userId));
         }
 
         // GET api/<SerieController>?id=5&language=es-ES
         [Route("getSerie")]
         [HttpGet]
-        public async Task<IActionResult> GetSerieAsync([FromQuery] int id, [FromQuery] string language)
+        public async Task<IActionResult> GetSerieAsync([FromQuery] int id, [FromQuery] string language, [FromQuery] int userId)
         {
             SerieService serieService = new SerieService(this._dbContext);
 
-            return Ok(await serieService.CreateSerie(id, language));
+            return Ok(await serieService.CreateSerie(id, language, userId));
         }
 
         // GET api/<SerieController>/getReviews?serieApiId=5
@@ -103,5 +102,26 @@ namespace TubeTrackerAPI.Controllers
 
             return Ok(await serieService.setSerieWatched(serieApiId, userId, language, watched));
         }
+
+        // POST api/<SeasonEpisodeController>/setSeasonEpisodeWatched?SeasonEpisode=76600&userId=1&watched=true
+        [Route("setSeasonEpisodeWatched")]
+        [HttpPost]
+        public async Task<IActionResult> setSeasonEpisodeWatched([FromQuery] int SerieApiId, [FromQuery] int seasonsEpisodeId, [FromQuery] int userId, [FromQuery] bool watched)
+        {
+            SerieService serieService = new SerieService(_dbContext);
+
+            return Ok(await serieService.setSeasonEpisodeWatched(SerieApiId, seasonsEpisodeId, userId, watched));
+        }
+
+        // POST api/<SerieController>/setSerieFavorite?serieApiId=76600&userId=1&favorite=true
+        [Route("setSerieFavorite")]
+        [HttpPost]
+        public async Task<IActionResult> setSerieFavorite([FromQuery] int serieApiId, [FromQuery] int userId, [FromQuery] string language, [FromQuery] bool favorite)
+        {
+            SerieService serieService = new SerieService(_dbContext);
+
+            return Ok(await serieService.setSerieFavorite(serieApiId, userId, language, favorite));
+        }
+
     }
 }

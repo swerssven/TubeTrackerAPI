@@ -26,20 +26,12 @@ namespace TubeTrackerAPI.Models
 
         public DateTime? PremiereDate { get; set; }
 
-        public string Trailer { get; set; }
-
         public string Poster { get; set; }
 
         public string Backdrop { get; set; }
 
-        public ICollection<FavoriteSeries> FavoriteSeries { get; }
+        public bool? watched { get; set; }
 
-        public ICollection<SeasonsEpisode> SeasonsEpisodes { get; }
-
-        public ICollection<SerieRating> SerieRatings { get; }
-
-        public ICollection<SerieReview> SerieReviews { get; }
-
-        public ICollection<WatchedSeriesSeasonsEpisode> WatchedSeriesSeasonsEpisodes { get; }
+        public bool? favorite { get; set; }
     }
 }

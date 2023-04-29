@@ -8,7 +8,7 @@
         public string name { get; set; }
         //public string overview { get; set; }
         //public string production_code { get; set; }
-        public int runtime { get; set; }
+        public int? runtime { get; set; }
         //public int season_number { get; set; }
         //public int show_id { get; set; }
         //public string still_path { get; set; }
