@@ -53,6 +53,16 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await serieService.CreateSerie(id, language, userId));
         }
 
+        // GET api/<SerieController>?serieApiId=5&language=es-ES
+        [Route("getSeasonsEpisodesList")]
+        [HttpGet]
+        public async Task<IActionResult> GetSeasonsEpisodesList([FromQuery] int serieApiId, [FromQuery] int userId)
+        {
+            SerieService serieService = new SerieService(this._dbContext);
+
+            return Ok(await serieService.GetSeasonsEpisodesList(serieApiId, userId));
+        }
+
         // GET api/<SerieController>/getReviews?serieApiId=5
         [Route("getReviews")]
         [HttpGet]

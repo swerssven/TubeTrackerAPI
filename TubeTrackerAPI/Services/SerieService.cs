@@ -136,6 +136,11 @@ namespace TubeTrackerAPI.Services
             return await serieRepository.CreateSerie(serie, seasonsEpisodesList, userId);
         }
 
+        public async Task<SeasonsEpisodesListDto> GetSeasonsEpisodesList(int serieApiId, int userId)
+        {
+            return await _repository.GetSeasonsEpisodesList(serieApiId, userId);
+        }
+
         public async Task<SerieReviewDto> GetSerieReviews(int serieApiId)
         {
             SerieRepository serieRepository = new SerieRepository(_dbContext);

@@ -133,7 +133,6 @@ namespace TubeTrackerAPI.Repositories
             movieDto.TrailerEn = MovieQuery.TrailerEn;
             await this.checkWatchedAndFavoriteMovie(movieDto, userId);
 
-
             return movieDto;
         }
 

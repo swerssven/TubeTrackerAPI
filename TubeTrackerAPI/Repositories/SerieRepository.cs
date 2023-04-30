@@ -161,6 +161,41 @@ namespace TubeTrackerAPI.Repositories
             return serieDto;
         }
 
+        public async Task<SeasonsEpisodesListDto> GetSeasonsEpisodesList(int serieApiId, int userId)
+        {
+            int serieId = await this.getSerieDbId(serieApiId);
+
+            SeasonsEpisodesListDto seasonsEpisodesListDto = new SeasonsEpisodesListDto();
+
+            seasonsEpisodesListDto.TotalNumSeasons = await _dbContext.SeasonsEpisodes.Where(s => s.SerieId == serieId).Select(s => s.NumSeason).Distinct().CountAsync();
+
+            seasonsEpisodesListDto.TotalNumEpisodes = await _dbContext.SeasonsEpisodes.Where(s => s.SerieId == serieId).Select(s => s.NumEpisode).CountAsync();
+
+            seasonsEpisodesListDto.SeasonsList = new List<SeasonsDto>();
+
+            for (int i = 1; i <= seasonsEpisodesListDto.TotalNumSeasons; i++)
+            {
+                SeasonsDto seasonsDto = new SeasonsDto();
+                seasonsDto.NumSeason = i;
+                seasonsDto.EpisodesList = await _dbContext.SeasonsEpisodes.Where(s => s.SerieId == serieId && s.NumSeason == i)
+                    .Select(s => new SeasonsEpisodeDto
+                    {
+                        SeasonsEpisodesId = s.SeasonsEpisodesId,
+                        SerieId = s.SerieId,
+                        NumSeason = s.NumSeason,
+                        NumEpisode = s.NumEpisode,
+                        EpisodeDuration = s.EpisodeDuration,
+                        TitleEpisodeEn = s.TitleEpisodeEn,
+                        TitleEpisodeEs = s.TitleEpisodeEs,
+                        PremiereDate = s.PremiereDate
+                    }).ToListAsync();
+                seasonsDto = await this.checkWatchedSeasonEpisodeFromList(seasonsDto, serieId, userId);
+                seasonsEpisodesListDto.SeasonsList.Add(seasonsDto);
+            }
+
+            return seasonsEpisodesListDto;
+        }
+
         public async Task<string> GetSeasonExternal(int serieId, int numSeason, string language)
         {
             string apiURL = $"/tv/{serieId}/season/{numSeason}?api_key={apiKey}&language={language}";
@@ -476,6 +511,26 @@ namespace TubeTrackerAPI.Repositories
             }
 
             return serie;
+        }
+
+        // Check if episode is watched by specific user.
+        public async Task<SeasonsDto> checkWatchedSeasonEpisodeFromList(SeasonsDto seasonsDto, int serieId, int userId)
+        {
+            foreach (var episode in seasonsDto.EpisodesList)
+            {
+                var watchedQuery = await _dbContext.WatchedSeriesSeasonsEpisodes.Where(w => w.SerieId == serieId && w.SeasonsEpisodesId == episode.SeasonsEpisodesId && w.UserId == userId).FirstOrDefaultAsync();
+                
+                if (watchedQuery != null)
+                {
+                    episode.Watched = true;
+                }
+                else
+                {
+                    episode.Watched = false;
+                }
+            }
+
+            return seasonsDto;
         }
     }
 }
