@@ -434,6 +434,36 @@ namespace TubeTrackerAPI.Repositories
             return result;
         }
 
+        // Get user's favorites series.
+        public async Task<IEnumerable<SerieDto>> getSeriesFavoritesList(int userId)
+        {
+            List<int> serieIds = await _dbContext.FavoriteSeries.Where(f => f.UserId == userId).Select(s => s.SerieId).ToListAsync();
+            IEnumerable<SerieDto> favoriteSerieList = await _dbContext.Series.Where(s => serieIds.Contains(s.SerieId))
+                .Select(s => new SerieDto()
+                {
+                    SerieId = s.SerieId,
+                    SerieApiId = s.SerieApiId,
+                    TitleEn = s.TitleEn,
+                    TitleEs = s.TitleEs,
+                    DescriptionEn = s.DescriptionEn,
+                    DescriptionEs = s.DescriptionEs,
+                    Actors = s.Actors,
+                    Creators = s.Creators,
+                    GenresEn = s.GenresEn,
+                    GenresEs = s.GenresEs,
+                    PremiereDate = s.PremiereDate,
+                    Poster = s.Poster,
+                    Backdrop = s.Backdrop
+                }).ToListAsync();
+
+            foreach (var serie in favoriteSerieList)
+            {
+                await checkWatchedAndFavoriteSerie(serie, userId);
+            }
+
+            return favoriteSerieList;
+        }
+
         public async Task<int> getSerieDbId(int serieApiId)
         {
             var serie = await _dbContext.Series.Where(m => m.SerieApiId == serieApiId).FirstOrDefaultAsync();

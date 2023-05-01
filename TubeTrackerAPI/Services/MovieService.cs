@@ -166,5 +166,9 @@ namespace TubeTrackerAPI.Services
             return await _repository.setMovieFavorite(movieId, userId, favorite);
         }
 
+        public async Task<IEnumerable<MovieDto>> getMovieFavoritesList(int userId)
+        {
+            return await _repository.getMovieFavoritesList(userId);
+        }
     }
 }

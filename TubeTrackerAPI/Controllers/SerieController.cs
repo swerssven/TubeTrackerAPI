@@ -133,5 +133,14 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await serieService.setSerieFavorite(serieApiId, userId, language, favorite));
         }
 
+        // GET api/<SerieController>/getSeriesFavoritesList?userId=1
+        [Route("getSeriesFavoritesList")]
+        [HttpGet]
+        public async Task<IActionResult> getSeriesFavoritesList([FromQuery] int userId)
+        {
+            SerieService serieService = new SerieService(this._dbContext);
+
+            return Ok(await serieService.getSeriesFavoritesList(userId));
+        }
     }
 }

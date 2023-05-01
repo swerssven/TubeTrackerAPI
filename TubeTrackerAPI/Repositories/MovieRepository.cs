@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Request;
@@ -312,6 +313,39 @@ namespace TubeTrackerAPI.Repositories
             }
 
             return result;
+        }
+
+        // Get user's favorites movies.
+        public async Task<IEnumerable<MovieDto>> getMovieFavoritesList(int userId)
+        {
+            List<int> movieIds = await _dbContext.FavoriteMovies.Where(f => f.UserId == userId).Select(m => m.MovieId).ToListAsync();
+            IEnumerable<MovieDto> favoriteMovieList = await _dbContext.Movies.Where(m => movieIds.Contains(m.MovieId))
+                .Select(m => new MovieDto()
+                {
+                    MovieId = m.MovieId,
+                    MovieApiId = m.MovieApiId,
+                    TitleEn = m.TitleEn,
+                    TitleEs = m.TitleEs,
+                    DescriptionEn = m.DescriptionEn,
+                    DescriptionEs = m.DescriptionEs,
+                    Actors = m.Actors,
+                    Directors = m.Directors,
+                    GenresEn = m.GenresEn,
+                    GenresEs = m.GenresEs,
+                    PremiereDate = m.PremiereDate,
+                    Poster = m.Poster,
+                    Backdrop = m.Backdrop,
+                    Duration = m.Duration,
+                    TrailerEs = m.TrailerEs,
+                    TrailerEn = m.TrailerEn
+                }).ToListAsync();
+
+            foreach (var movie in favoriteMovieList)
+            {
+                await checkWatchedAndFavoriteMovie(movie, userId);
+            }
+
+            return favoriteMovieList;
         }
 
         // Get's database id with the external api id.
