@@ -20,5 +20,7 @@
         public bool watched { get; set; }
 
         public bool favorite { get; set; }
+
+        public DateTime DateAddedFavorite { get; set; }
     }
 }

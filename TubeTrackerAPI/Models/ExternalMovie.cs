@@ -6,7 +6,7 @@ namespace TubeTrackerAPI.Models
     {
         //public bool Adult { get; set; }
         public string backdrop_path { get; set; }
-        public List<int> genre_ids { get; set; }
+
         public int id { get; set; }
         //public string original_language { get; set; }
         //public string original_title { get; set; }
@@ -22,5 +22,7 @@ namespace TubeTrackerAPI.Models
         public bool? watched { get; set; }
 
         public bool? favorite { get; set; }
+
+        public DateTime? DateAddedFavorite { get; set;}
     }
 }

@@ -136,11 +136,11 @@ namespace TubeTrackerAPI.Controllers
         // GET api/<SerieController>/getSeriesFavoritesList?userId=1
         [Route("getSeriesFavoritesList")]
         [HttpGet]
-        public async Task<IActionResult> getSeriesFavoritesList([FromQuery] int userId)
+        public async Task<IActionResult> getSeriesFavoritesList([FromQuery] int userId, [FromQuery] string language)
         {
             SerieService serieService = new SerieService(this._dbContext);
 
-            return Ok(await serieService.getSeriesFavoritesList(userId));
+            return Ok(await serieService.getSeriesFavoritesList(userId, language));
         }
     }
 }

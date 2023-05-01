@@ -116,11 +116,11 @@ namespace TubeTrackerAPI.Controllers
         // GET api/<MovieController>/getMovieFavoritesList?userId=1
         [Route("getMovieFavoritesList")]
         [HttpGet]
-        public async Task<IActionResult> getMovieFavoritesList([FromQuery] int userId)
+        public async Task<IActionResult> getMovieFavoritesList([FromQuery] int userId, [FromQuery] string language)
         {
             MovieService movieService = new MovieService(this._dbContext);
 
-            return Ok(await movieService.getMovieFavoritesList(userId));
+            return Ok(await movieService.getMovieFavoritesList(userId, language));
         }
     }
 }

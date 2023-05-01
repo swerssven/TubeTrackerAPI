@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TubeTrackerAPI.Models;
@@ -316,33 +317,41 @@ namespace TubeTrackerAPI.Repositories
         }
 
         // Get user's favorites movies.
-        public async Task<IEnumerable<MovieDto>> getMovieFavoritesList(int userId)
+        public async Task<IEnumerable<ExternalMovie>> getMovieFavoritesList(int userId, string language)
         {
             List<int> movieIds = await _dbContext.FavoriteMovies.Where(f => f.UserId == userId).Select(m => m.MovieId).ToListAsync();
-            IEnumerable<MovieDto> favoriteMovieList = await _dbContext.Movies.Where(m => movieIds.Contains(m.MovieId))
-                .Select(m => new MovieDto()
-                {
-                    MovieId = m.MovieId,
-                    MovieApiId = m.MovieApiId,
-                    TitleEn = m.TitleEn,
-                    TitleEs = m.TitleEs,
-                    DescriptionEn = m.DescriptionEn,
-                    DescriptionEs = m.DescriptionEs,
-                    Actors = m.Actors,
-                    Directors = m.Directors,
-                    GenresEn = m.GenresEn,
-                    GenresEs = m.GenresEs,
-                    PremiereDate = m.PremiereDate,
-                    Poster = m.Poster,
-                    Backdrop = m.Backdrop,
-                    Duration = m.Duration,
-                    TrailerEs = m.TrailerEs,
-                    TrailerEn = m.TrailerEn
-                }).ToListAsync();
+            IEnumerable<ExternalMovie> favoriteMovieList = new List<ExternalMovie>();
+            
+            if(language == "en-EN")
+            {
+                favoriteMovieList = await _dbContext.Movies.Where(m => movieIds.Contains(m.MovieId))
+                    .Select(m => new ExternalMovie()
+                    {
+                        id = m.MovieApiId,
+                        title = m.TitleEn,
+                        release_date = m.PremiereDate.ToString(),
+                        poster_path = m.Poster,
+                        backdrop_path = m.Backdrop
+                    }).ToListAsync();
+            }
+            else if (language == "es-ES")
+            {
+                favoriteMovieList = await _dbContext.Movies.Where(m => movieIds.Contains(m.MovieId))
+                    .Select(m => new ExternalMovie()
+                    {
+                        id = m.MovieApiId,
+                        title = m.TitleEs,
+                        release_date = m.PremiereDate.ToString(),
+                        poster_path = m.Poster,
+                        backdrop_path = m.Backdrop
+                    }).ToListAsync();
+            }
 
             foreach (var movie in favoriteMovieList)
             {
                 await checkWatchedAndFavoriteMovie(movie, userId);
+                movie.DateAddedFavorite = await _dbContext.FavoriteMovies.Where(f => f.UserId == userId && f.MovieId == movie.id).
+                    Select(s => s.DateAdded).FirstOrDefaultAsync();
             }
 
             return favoriteMovieList;
@@ -394,10 +403,40 @@ namespace TubeTrackerAPI.Repositories
             return movieResponse;
         }
 
-        // Check if movie is watched and favorited by specific user.
+        // Check if movie is watched and favorited by specific user with movieDto.
         public async Task<MovieDto> checkWatchedAndFavoriteMovie(MovieDto movie, int userId)
         {
             var movieId = await this.getMovieDbId(movie.MovieApiId);
+
+            var watchedQuery = await _dbContext.WatchedMovies.Where(w => w.MovieId == movieId && w.UserId == userId).FirstOrDefaultAsync();
+
+            if (watchedQuery != null)
+            {
+                movie.watched = true;
+            }
+            else
+            {
+                movie.watched = false;
+            }
+
+            var favoriteQuery = await _dbContext.FavoriteMovies.Where(w => w.MovieId == movieId && w.UserId == userId).FirstOrDefaultAsync();
+
+            if (favoriteQuery != null)
+            {
+                movie.favorite = true;
+            }
+            else
+            {
+                movie.favorite = false;
+            }
+
+            return movie;
+        }
+
+        // Check if movie is watched and favorited by specific user with external movie.
+        public async Task<ExternalMovie> checkWatchedAndFavoriteMovie(ExternalMovie movie, int userId)
+        {
+            var movieId = await this.getMovieDbId(movie.id);
 
             var watchedQuery = await _dbContext.WatchedMovies.Where(w => w.MovieId == movieId && w.UserId == userId).FirstOrDefaultAsync();
 

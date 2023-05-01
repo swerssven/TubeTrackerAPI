@@ -210,9 +210,9 @@ namespace TubeTrackerAPI.Services
             return await _repository.setSerieFavorite(serieId, userId, favorite);
         }
 
-        public async Task<IEnumerable<SerieDto>> getSeriesFavoritesList(int userId)
+        public async Task<IEnumerable<ExternalSerie>> getSeriesFavoritesList(int userId, string language)
         {
-            return await _repository.getSeriesFavoritesList(userId);
+            return await _repository.getSeriesFavoritesList(userId, language);
         }
     }
 }

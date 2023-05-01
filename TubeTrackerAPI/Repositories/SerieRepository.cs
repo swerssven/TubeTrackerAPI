@@ -435,30 +435,41 @@ namespace TubeTrackerAPI.Repositories
         }
 
         // Get user's favorites series.
-        public async Task<IEnumerable<SerieDto>> getSeriesFavoritesList(int userId)
+        public async Task<IEnumerable<ExternalSerie>> getSeriesFavoritesList(int userId, string language)
         {
             List<int> serieIds = await _dbContext.FavoriteSeries.Where(f => f.UserId == userId).Select(s => s.SerieId).ToListAsync();
-            IEnumerable<SerieDto> favoriteSerieList = await _dbContext.Series.Where(s => serieIds.Contains(s.SerieId))
-                .Select(s => new SerieDto()
-                {
-                    SerieId = s.SerieId,
-                    SerieApiId = s.SerieApiId,
-                    TitleEn = s.TitleEn,
-                    TitleEs = s.TitleEs,
-                    DescriptionEn = s.DescriptionEn,
-                    DescriptionEs = s.DescriptionEs,
-                    Actors = s.Actors,
-                    Creators = s.Creators,
-                    GenresEn = s.GenresEn,
-                    GenresEs = s.GenresEs,
-                    PremiereDate = s.PremiereDate,
-                    Poster = s.Poster,
-                    Backdrop = s.Backdrop
-                }).ToListAsync();
+            IEnumerable<ExternalSerie> favoriteSerieList = new List<ExternalSerie>();
+
+            if(language == "en-EN")
+            {
+                favoriteSerieList = await _dbContext.Series.Where(s => serieIds.Contains(s.SerieId))
+                    .Select(s => new ExternalSerie()
+                    {
+                        id = s.SerieApiId,
+                        name = s.TitleEn,
+                        first_air_date = s.PremiereDate.ToString(),
+                        poster_path = s.Poster,
+                        backdrop_path = s.Backdrop,
+                    }).ToListAsync();
+            }
+            else if(language == "es-ES")
+            {
+                favoriteSerieList = await _dbContext.Series.Where(s => serieIds.Contains(s.SerieId))
+                    .Select(s => new ExternalSerie()
+                    {
+                        id = s.SerieApiId,
+                        name = s.TitleEs,
+                        first_air_date = s.PremiereDate.ToString(),
+                        poster_path = s.Poster,
+                        backdrop_path = s.Backdrop,
+                    }).ToListAsync();
+            }
 
             foreach (var serie in favoriteSerieList)
             {
                 await checkWatchedAndFavoriteSerie(serie, userId);
+                serie.DateAddedFavorite = await _dbContext.FavoriteSeries.Where(f => f.UserId == userId && f.SerieId == serie.id).
+                    Select(s => s.DateAdded).FirstOrDefaultAsync();
             }
 
             return favoriteSerieList;
@@ -511,7 +522,7 @@ namespace TubeTrackerAPI.Repositories
             return serieResponse;
         }
 
-        // Check if serie is watched and favorited by specific user.
+        // Check if serie is watched and favorited by specific user with serie dto.
         public async Task<SerieDto> checkWatchedAndFavoriteSerie(SerieDto serie, int userId)
         {
             var serieId = await this.getSerieDbId(serie.SerieApiId);
@@ -561,6 +572,38 @@ namespace TubeTrackerAPI.Repositories
             }
 
             return seasonsDto;
+        }
+
+        // Check if serie is watched and favorited by specific user with external serie.
+        public async Task<ExternalSerie> checkWatchedAndFavoriteSerie(ExternalSerie serie, int userId)
+        {
+            var serieId = await this.getSerieDbId(serie.id);
+
+            int episodeCount = await _dbContext.SeasonsEpisodes.CountAsync(s => s.SerieId == serieId);
+
+            int watchedEpisodeCount = await _dbContext.WatchedSeriesSeasonsEpisodes.CountAsync(w => w.SerieId == serieId && w.UserId == userId);
+
+            if (episodeCount == watchedEpisodeCount && episodeCount > 0)
+            {
+                serie.watched = true;
+            }
+            else
+            {
+                serie.watched = false;
+            }
+
+            var favoriteQuery = await _dbContext.FavoriteSeries.Where(w => w.SerieId == serieId && w.UserId == userId).FirstOrDefaultAsync();
+
+            if (favoriteQuery != null)
+            {
+                serie.favorite = true;
+            }
+            else
+            {
+                serie.favorite = false;
+            }
+
+            return serie;
         }
     }
 }
