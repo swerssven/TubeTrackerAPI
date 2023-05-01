@@ -22,7 +22,7 @@ namespace TubeTrackerAPI.Models
     {
         public int SeasonsEpisodesId { get; set; }
 
-        public int SerieId { get; set; }
+        public int SerieApiId { get; set; }
 
         public int NumSeason { get; set; }
 

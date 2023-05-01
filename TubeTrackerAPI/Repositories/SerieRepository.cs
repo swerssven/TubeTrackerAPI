@@ -85,7 +85,7 @@ namespace TubeTrackerAPI.Repositories
         // Create new serie in data base
         public async Task<SerieDto> CreateSerie(Series serie, List<SeasonsEpisode> seasonsEpisodes, int userId)
         {
-            var SerieQuery = await _dbContext.Series.Where(m => m.SerieApiId == serie.SerieApiId).FirstOrDefaultAsync();
+            var SerieQuery = await _dbContext.Series.Include(m => m.SeasonsEpisodes).Where(m => m.SerieApiId == serie.SerieApiId).FirstOrDefaultAsync();
 
             if (SerieQuery == null)
             {
@@ -181,7 +181,7 @@ namespace TubeTrackerAPI.Repositories
                     .Select(s => new SeasonsEpisodeDto
                     {
                         SeasonsEpisodesId = s.SeasonsEpisodesId,
-                        SerieId = s.SerieId,
+                        SerieApiId = serieApiId,
                         NumSeason = s.NumSeason,
                         NumEpisode = s.NumEpisode,
                         EpisodeDuration = s.EpisodeDuration,
