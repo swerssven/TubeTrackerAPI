@@ -22,13 +22,6 @@ namespace TubeTrackerAPI.Controllers
         {
             _tubeTrackerDbContext = tubeTrackerDbContext;
         }
-        /*
-        // GET: api/<UserController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }*/
 
         // GET api/<UserController>/5
         [Authorize]
@@ -60,6 +53,17 @@ namespace TubeTrackerAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, response.Message);
             }
+        }
+
+        // GET api/<UserController>/GetUserStatistics?userId=3
+        [Route("GetUserStatistics")]
+        [HttpGet]
+        public async Task<IActionResult> GetUserStatistics([FromQuery] int userId)
+        {
+            UserService userService = new UserService(_tubeTrackerDbContext);
+            UserStatisticsDto userStatisticsDto = await userService.GetUserStatistics(userId);
+
+            return Ok(userStatisticsDto);
         }
     }
 }

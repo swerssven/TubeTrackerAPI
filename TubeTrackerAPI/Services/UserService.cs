@@ -83,5 +83,32 @@ namespace TubeTrackerAPI.Services
 
             return userDto;
         }
+
+        internal async Task<UserStatisticsDto> GetUserStatistics(int userId)
+        {
+            BaseResponse response = new BaseResponse();
+            UserStatisticsDto userStatisticsDto = new UserStatisticsDto();
+            try
+            {
+                UserRepository userRepository = new UserRepository(_tubeTrackerDbContext);
+                userStatisticsDto = await userRepository.GetUserStatistics(userId);
+
+                if (userStatisticsDto != null)
+                {
+                    response.Status = StatusEnum.Ok;
+                }
+                else
+                {
+                    response.Status = StatusEnum.UserNotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = StatusEnum.UnkownError;
+                response.Message = ex.ToString();
+            }
+
+            return userStatisticsDto;
+        }
     }
 }
