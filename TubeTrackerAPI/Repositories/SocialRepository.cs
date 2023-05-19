@@ -149,18 +149,25 @@ namespace TubeTrackerAPI.Repositories
             return messagesResponse;
         }
 
-        internal async Task<IEnumerable<Message>> getMessagesList(int userId, int friendUserId)
+        internal async Task<MessageDto> getMessagesList(int userId, int friendUserId)
         {
             var messagesQuery = await _dbContext.Messages.Where(m => m.ReceiverUserId == userId && m.SenderUserId == friendUserId).ToListAsync();
             messagesQuery.ForEach(m => { m.IsRead = true; }); // Mark old incomming messages as read.
             _dbContext.UpdateRange(messagesQuery);
             await _dbContext.SaveChangesAsync();
 
-            IEnumerable<Message> messagesResponse = await _dbContext.Messages
+            IEnumerable<Message> messagesList = await _dbContext.Messages
                 .Where(m => m.SenderUserId == userId && m.ReceiverUserId == friendUserId || m.SenderUserId == friendUserId && m.ReceiverUserId == userId)
                 .OrderBy(m => m.CreationDate).ToListAsync();
 
-            return messagesResponse;
+            MessageDto response = await _dbContext.Users.Where(u => u.UserId == friendUserId).Select(m => new MessageDto()
+            {
+                MessagesList = messagesList,
+                ReceiverImage = m.Image,
+                ReceiverName = m.Nickname
+            }).FirstOrDefaultAsync();
+
+            return response;
         }
 
         //internal async Task<int> getNumberUnreadMessages() 
@@ -173,7 +180,7 @@ namespace TubeTrackerAPI.Repositories
             {
                 var friendIdList = await _dbContext.Friends.Where(f => f.UserId == userId && f.FriendshipStatus == 1).Select(f => f.FriendUserId).ToListAsync();
 
-                posts = await _dbContext.Posts.Where(p => friendIdList.Contains(p.UserId)).OrderByDescending(p => p.CreationDate)
+                posts = await _dbContext.Posts.Where(p => p.UserId == userId || friendIdList.Contains(p.UserId)).OrderByDescending(p => p.CreationDate)
                     .Select(p => new PostDto()
                     {
                         PostId = p.PostId,
@@ -232,10 +239,26 @@ namespace TubeTrackerAPI.Repositories
             _dbContext.PostComments.Add(postComment);
             await _dbContext.SaveChangesAsync();
 
-            List<PostCommentDto> postCommentsList = await _dbContext.PostComments.Where(p => p.UserId == postComment.UserId).OrderByDescending(p => p.CreationDate)
+            List<PostCommentDto> postCommentsList = await _dbContext.PostComments.Where(p => p.PostId == postComment.PostId).OrderBy(p => p.CreationDate)
                 .Select(p => new PostCommentDto()
                 {
                     PostId = postComment.PostId,
+                    Content = p.Content,
+                    UserId = p.UserId,
+                    UserNickname = p.User.Nickname,
+                    UserImage = p.User.Image,
+                    CreationDate = p.CreationDate
+                }).ToListAsync();
+
+            return postCommentsList;
+        }
+
+        internal async Task<IEnumerable<PostCommentDto>> getCommentsList(int postId)
+        {
+            List<PostCommentDto> postCommentsList = await _dbContext.PostComments.Where(p => p.PostId == postId).OrderBy(p => p.CreationDate)
+                .Select(p => new PostCommentDto()
+                {
+                    PostId = p.PostId,
                     Content = p.Content,
                     UserId = p.UserId,
                     UserNickname = p.User.Nickname,

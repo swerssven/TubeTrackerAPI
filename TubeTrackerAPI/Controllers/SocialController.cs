@@ -118,5 +118,15 @@ namespace TubeTrackerAPI.Controllers
 
             return Ok(await socialService.CreatePostComment(request));
         }
+
+        //GET api/<SocialController>/getCommentsList?userId=1&friendUserId=2
+        [Route("posts/getCommentsList")]
+        [HttpGet]
+        public async Task<IActionResult> getCommentsList(int postId)
+        {
+            SocialService socialService = new SocialService(_dbContext);
+
+            return Ok(await socialService.getCommentsList(postId));
+        }
     }
 }
