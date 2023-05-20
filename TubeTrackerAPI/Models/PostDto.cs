@@ -15,6 +15,9 @@ namespace TubeTrackerAPI.Models
         public string Content { get; set; }
 
         public DateTime CreationDate { get; set; }
+
+        public int LikesCount { get; set; }
+
         public virtual ICollection<PostComment> PostComments { get; set; }
     }
 }

@@ -128,5 +128,15 @@ namespace TubeTrackerAPI.Controllers
 
             return Ok(await socialService.getCommentsList(postId));
         }
+
+        //POST api/<SocialController>/createPostLike?userId=1&postId=3&liked=true.
+        [Route("posts/createPostLike")]
+        [HttpPost]
+        public async Task<IActionResult> createPostLike([FromQuery] int userId, [FromQuery] int postId, [FromQuery] bool liked)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.createPostLike(userId, postId, liked));
+        }
     }
 }

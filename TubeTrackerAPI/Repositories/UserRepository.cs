@@ -89,8 +89,8 @@ namespace TubeTrackerAPI.Repositories
             userStatisticsDto.Posts = await _dbContext.Posts.Where(p => p.UserId == userId).CountAsync();
 
             userStatisticsDto.PostComments = await _dbContext.PostComments.Where(w => w.UserId == userId).CountAsync();
-
-            userStatisticsDto.LikesPosts = await _dbContext.Users.Where(w => w.UserId == userId).Select(x => x.PostsNavigation).CountAsync();
+            
+            var ss = await _dbContext.Users.Include(x => x.PostsNavigation).FirstOrDefaultAsync(x => x.UserId == userId);
 
             userStatisticsDto.Friends = await _dbContext.Friends.Where(f => f.UserId == userId && f.FriendshipStatus == (int)FriendshipStatus.Friends).CountAsync();
 

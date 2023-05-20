@@ -189,7 +189,8 @@ namespace TubeTrackerAPI.Repositories
                         UserNickname = p.User.Nickname,
                         UserImage = p.User.Image,
                         CreationDate = p.CreationDate,
-                        PostComments = p.PostComments
+                        PostComments = p.PostComments,
+                        LikesCount = p.Users.Count() // Entity Framework changed name of db table references likes many to many.
                     }).ToListAsync();
             }
             else
@@ -203,7 +204,8 @@ namespace TubeTrackerAPI.Repositories
                         UserNickname = p.User.Nickname,
                         UserImage = p.User.Image,
                         CreationDate = p.CreationDate,
-                        PostComments = p.PostComments
+                        PostComments = p.PostComments,
+                        LikesCount = p.Users.Count() // Entity Framework changed name of db table references likes many to many.
                     }).ToListAsync();
             }
             return posts;
@@ -267,6 +269,29 @@ namespace TubeTrackerAPI.Repositories
                 }).ToListAsync();
 
             return postCommentsList;
+        }
+
+        internal async Task<bool> createPostLike(int userId, int postId, bool liked)
+        {
+            var query = await _dbContext.Users.Include(x => x.PostsNavigation).FirstOrDefaultAsync(u => u.UserId == userId);
+            var postQuery = await _dbContext.Posts.Include(x => x.Users).FirstOrDefaultAsync(p => p.PostId == postId);
+            bool likedResponse = false;
+
+            if (liked)
+            {
+                query.PostsNavigation.Add(postQuery);
+            }
+            else
+            {
+                query.PostsNavigation.Remove(postQuery);
+            }
+
+            if (await _dbContext.SaveChangesAsync() > 0)
+            {
+                likedResponse = true;
+            }
+
+            return likedResponse;
         }
     }
 }

@@ -120,5 +120,14 @@ namespace TubeTrackerAPI.Services
 
             return postCommentsList;
         }
+
+        internal async Task<bool> createPostLike(int userId, int postId, bool liked)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            bool likedResponse = await socialRepository.createPostLike(userId, postId, liked);
+
+            return likedResponse;
+        }
     }
 }
