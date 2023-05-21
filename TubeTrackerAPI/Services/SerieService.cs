@@ -224,5 +224,10 @@ namespace TubeTrackerAPI.Services
         {
             return await _repository.getSeriesFavoritesList(userId, language);
         }
+
+        public async Task<IEnumerable<ExternalSerie>> getLastWatchedSeriesList(int userId, string language)
+        {
+            return await _repository.getLastWatchedSeriesList(userId, language);
+        }
     }
 }

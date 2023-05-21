@@ -605,5 +605,46 @@ namespace TubeTrackerAPI.Repositories
 
             return serie;
         }
+
+        // Get user's last 10 watched series.
+        public async Task<IEnumerable<ExternalSerie>> getLastWatchedSeriesList(int userId, string language)
+        {
+            List<int> serieIds = await _dbContext.WatchedSeriesSeasonsEpisodes.OrderByDescending(e => e.DateWatched).Where(f => f.UserId == userId).Select(s => s.SerieId).Distinct().ToListAsync();
+            IEnumerable<ExternalSerie> watchedSerieList = new List<ExternalSerie>();
+
+            if (language == "en-EN")
+            {
+                watchedSerieList = await _dbContext.Series.Where(s => serieIds.Contains(s.SerieId))
+                    .Select(s => new ExternalSerie()
+                    {
+                        id = s.SerieApiId,
+                        name = s.TitleEn,
+                        first_air_date = s.PremiereDate.ToString(),
+                        poster_path = s.Poster,
+                        backdrop_path = s.Backdrop,
+                    }).ToListAsync();
+            }
+            else if (language == "es-ES")
+            {
+                watchedSerieList = await _dbContext.Series.Where(s => serieIds.Contains(s.SerieId))
+                    .Select(s => new ExternalSerie()
+                    {
+                        id = s.SerieApiId,
+                        name = s.TitleEs,
+                        first_air_date = s.PremiereDate.ToString(),
+                        poster_path = s.Poster,
+                        backdrop_path = s.Backdrop,
+                    }).ToListAsync();
+            }
+
+            foreach (var serie in watchedSerieList)
+            {
+                await checkWatchedAndFavoriteSerie(serie, userId);
+                serie.DateAddedFavorite = await _dbContext.FavoriteSeries.Where(f => f.UserId == userId && f.SerieId == serie.id).
+                    Select(s => s.DateAdded).FirstOrDefaultAsync();
+            }
+
+            return watchedSerieList.Take(12);
+        }
     }
 }

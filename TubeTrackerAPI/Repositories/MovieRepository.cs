@@ -463,10 +463,10 @@ namespace TubeTrackerAPI.Repositories
             return movie;
         }
 
-        // Get user's last 20 watched movies.
+        // Get user's last 12 watched movies.
         public async Task<IEnumerable<ExternalMovie>> getLastWatchedMoviesList(int userId, string language)
         {
-            List<int> movieIds = await _dbContext.WatchedMovies.OrderByDescending(m => m.DateWatched).Take(20).Where(f => f.UserId == userId).Select(m => m.MovieId).ToListAsync();
+            List<int> movieIds = await _dbContext.WatchedMovies.OrderByDescending(m => m.DateWatched).Take(12).Where(f => f.UserId == userId).Select(m => m.MovieId).ToListAsync();
             IEnumerable<ExternalMovie> watchedMovieList = new List<ExternalMovie>();
 
             if (language == "en-EN")
@@ -492,6 +492,13 @@ namespace TubeTrackerAPI.Repositories
                         poster_path = m.Poster,
                         backdrop_path = m.Backdrop
                     }).ToListAsync();
+            }
+
+            foreach (var movie in watchedMovieList)
+            {
+                await checkWatchedAndFavoriteMovie(movie, userId);
+                movie.DateAddedFavorite = await _dbContext.FavoriteMovies.Where(f => f.UserId == userId && f.MovieId == movie.id).
+                    Select(s => s.DateAdded).FirstOrDefaultAsync();
             }
 
             return watchedMovieList;

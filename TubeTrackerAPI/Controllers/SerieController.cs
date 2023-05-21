@@ -144,5 +144,15 @@ namespace TubeTrackerAPI.Controllers
 
             return Ok(await serieService.getSeriesFavoritesList(userId, language));
         }
+
+        // GET api/<MovieController>/getLastWatchedSeriesList?userId=1&language=Es-ES
+        [Route("getLastWatchedSeriesList")]
+        [HttpGet]
+        public async Task<IActionResult> getLastWatchedSeriesList([FromQuery] int userId, [FromQuery] string language)
+        {
+            SerieService serieService = new SerieService(this._dbContext);
+
+            return Ok(await serieService.getLastWatchedSeriesList(userId, language));
+        }
     }
 }
