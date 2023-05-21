@@ -6,6 +6,8 @@ namespace TubeTrackerAPI.Models
     {
         public int NewsId { get; set; }
 
+        public int UserId { get; set; }
+
         public string creatorNickname { get; set; }
 
         public string userImage { get; set; }

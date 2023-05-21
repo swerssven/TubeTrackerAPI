@@ -32,6 +32,7 @@ namespace TubeTrackerAPI.Repositories
                 .Select(n => new NewsDto()
                 {
                     NewsId = n.NewsId,
+                    UserId = n.UserId,
                     ContentEs = n.ContentEs,
                     ContentEn = n.ContentEn,
                     creatorNickname = n.User.Nickname,
