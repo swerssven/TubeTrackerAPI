@@ -462,5 +462,39 @@ namespace TubeTrackerAPI.Repositories
 
             return movie;
         }
+
+        // Get user's last 20 watched movies.
+        public async Task<IEnumerable<ExternalMovie>> getLastWatchedMoviesList(int userId, string language)
+        {
+            List<int> movieIds = await _dbContext.WatchedMovies.OrderByDescending(m => m.DateWatched).Take(20).Where(f => f.UserId == userId).Select(m => m.MovieId).ToListAsync();
+            IEnumerable<ExternalMovie> watchedMovieList = new List<ExternalMovie>();
+
+            if (language == "en-EN")
+            {
+                watchedMovieList = await _dbContext.Movies.Where(m => movieIds.Contains(m.MovieId))
+                    .Select(m => new ExternalMovie()
+                    {
+                        id = m.MovieApiId,
+                        title = m.TitleEn,
+                        release_date = m.PremiereDate.ToString(),
+                        poster_path = m.Poster,
+                        backdrop_path = m.Backdrop
+                    }).ToListAsync();
+            }
+            else if (language == "es-ES")
+            {
+                watchedMovieList = await _dbContext.Movies.Where(m => movieIds.Contains(m.MovieId))
+                    .Select(m => new ExternalMovie()
+                    {
+                        id = m.MovieApiId,
+                        title = m.TitleEs,
+                        release_date = m.PremiereDate.ToString(),
+                        poster_path = m.Poster,
+                        backdrop_path = m.Backdrop
+                    }).ToListAsync();
+            }
+
+            return watchedMovieList;
+        }
     }
 }

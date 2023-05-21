@@ -28,7 +28,7 @@ namespace TubeTrackerAPI.Services
 
             movieResponse = await _repository.checkWatchedAndFavoriteMoviesFromList(movieResponse, userId);
 
-            return movieResponse;  
+            return movieResponse;
         }
 
         public async Task<MovieResponse> GetMoviePopularList(string language, int userId)
@@ -63,7 +63,7 @@ namespace TubeTrackerAPI.Services
 
             List<MovieCast> cast = externalMovieDetailsResponse.credits.cast.Where(c => c.known_for_department == "Acting").ToList();
             string actors = null;
-            if(cast != null)
+            if (cast != null)
             {
                 actors = string.Join(", ", cast.Select(c => c.name).Take(20).ToList());
             }
@@ -98,7 +98,7 @@ namespace TubeTrackerAPI.Services
                 movie.DescriptionEn = externalMovieDetailsResponse.overview;
                 movie.GenresEn = genres;
                 movie.TrailerEn = trailer;
-            } 
+            }
             else if (language == "es-ES")
             {
                 movie.TitleEs = externalMovieDetailsResponse.title;
@@ -107,7 +107,7 @@ namespace TubeTrackerAPI.Services
                 movie.TrailerEs = trailer;
             }
 
-            return await _repository.CreateMovie(movie, userId); 
+            return await _repository.CreateMovie(movie, userId);
         }
 
         public async Task<MovieReviewDto> GetMovieReviews(int movieApiId)
@@ -116,7 +116,7 @@ namespace TubeTrackerAPI.Services
 
             return movieReviewResponse;
         }
-        
+
         public async Task<MovieReviewDto> CreateMovieReviewList(CreateMovieReviewListRequest request)
         {
             MovieRepository movieRepository = new MovieRepository(_dbContext);
@@ -151,6 +151,11 @@ namespace TubeTrackerAPI.Services
                 await this.CreateMovie(movieApiId, language, userId);
                 movieId = await _repository.getMovieDbId(movieApiId);
             }
+            else
+            {
+                await this.CreateMovie(movieApiId, language, userId); // Update languages.
+            }
+
             return await _repository.setMovieWatched(movieId, userId, watched);
         }
 
@@ -163,6 +168,11 @@ namespace TubeTrackerAPI.Services
                 await this.CreateMovie(movieApiId, language, userId);
                 movieId = await _repository.getMovieDbId(movieApiId);
             }
+            else
+            {
+                await this.CreateMovie(movieApiId, language, userId); // Update languages.
+            }
+
             return await _repository.setMovieFavorite(movieId, userId, favorite);
         }
 
@@ -170,5 +180,10 @@ namespace TubeTrackerAPI.Services
         {
             return await _repository.getMovieFavoritesList(userId, language);
         }
-    }
+
+        public async Task<IEnumerable<ExternalMovie>> getLastWatchedMoviesList(int userId, string language)
+        {
+            return await _repository.getLastWatchedMoviesList(userId, language);
+        }
+    } 
 }

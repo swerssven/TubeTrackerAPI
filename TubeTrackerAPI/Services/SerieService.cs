@@ -188,6 +188,11 @@ namespace TubeTrackerAPI.Services
                 await this.CreateSerie(serieApiId, language, userId);
                 serieId = await _repository.getSerieDbId(serieApiId);
             }
+            else
+            {
+                await this.CreateSerie(serieApiId, language, userId);
+            }
+
             return await _repository.setSerieWatched(serieId, userId, watched);
         }
 
@@ -207,6 +212,11 @@ namespace TubeTrackerAPI.Services
                 await this.CreateSerie(serieApiId, language, userId);
                 serieId = await _repository.getSerieDbId(serieApiId);
             }
+            else
+            {
+                await this.CreateSerie(serieApiId, language, userId);
+            }
+
             return await _repository.setSerieFavorite(serieId, userId, favorite);
         }
 

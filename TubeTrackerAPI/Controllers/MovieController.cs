@@ -2,10 +2,11 @@
 using TubeTrackerAPI.Services;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.Models.Request;
+using TubeTrackerAPI.Middleware;
 
 namespace TubeTrackerAPI.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class MovieController : ControllerBase
@@ -113,7 +114,7 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await movieService.setMovieFavorite(movieApiId, userId, language, favorite));
         }
 
-        // GET api/<MovieController>/getMovieFavoritesList?userId=1
+        // GET api/<MovieController>/getMovieFavoritesList?userId=1&language=es-ES
         [Route("getMovieFavoritesList")]
         [HttpGet]
         public async Task<IActionResult> getMovieFavoritesList([FromQuery] int userId, [FromQuery] string language)
@@ -121,6 +122,16 @@ namespace TubeTrackerAPI.Controllers
             MovieService movieService = new MovieService(this._dbContext);
 
             return Ok(await movieService.getMovieFavoritesList(userId, language));
+        }
+
+        // GET api/<MovieController>/getLastWatchedMoviesList?userId=1&language=Es-ES
+        [Route("getLastWatchedMoviesList")]
+        [HttpGet]
+        public async Task<IActionResult> getLastWatchedMoviesList([FromQuery] int userId, [FromQuery] string language)
+        {
+            MovieService movieService = new MovieService(this._dbContext);
+
+            return Ok(await movieService.getLastWatchedMoviesList(userId, language));
         }
     }
 }

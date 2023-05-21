@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TubeTrackerAPI.Middleware;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Services;
 using TubeTrackerAPI.TubeTrackerContext;
@@ -6,6 +7,7 @@ using TubeTrackerAPI.TubeTrackerEntities;
 
 namespace TubeTrackerAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SerieController : ControllerBase

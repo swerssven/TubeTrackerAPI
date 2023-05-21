@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TubeTrackerAPI.Middleware;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Services;
 using TubeTrackerAPI.TubeTrackerContext;
 
 namespace TubeTrackerAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SocialController : ControllerBase

@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
 using TubeTrackerAPI.Models.Request;
@@ -189,8 +190,8 @@ namespace TubeTrackerAPI.Repositories
                         UserNickname = p.User.Nickname,
                         UserImage = p.User.Image,
                         CreationDate = p.CreationDate,
-                        PostComments = p.PostComments,
-                        LikesCount = p.Users.Count() // Entity Framework changed name of db table references likes many to many.
+                        LikesCount = p.Users.Count(), // Entity Framework changed name of db table references likes many to many.
+                        LikedByUser = !p.Users.Where(l => l.UserId == userId).IsNullOrEmpty()
                     }).ToListAsync();
             }
             else
@@ -204,8 +205,8 @@ namespace TubeTrackerAPI.Repositories
                         UserNickname = p.User.Nickname,
                         UserImage = p.User.Image,
                         CreationDate = p.CreationDate,
-                        PostComments = p.PostComments,
-                        LikesCount = p.Users.Count() // Entity Framework changed name of db table references likes many to many.
+                        LikesCount = p.Users.Count(), // Entity Framework changed name of db table references likes many to many.
+                        LikedByUser = !p.Users.Where(l => l.UserId == userId).IsNullOrEmpty()
                     }).ToListAsync();
             }
             return posts;
@@ -280,15 +281,14 @@ namespace TubeTrackerAPI.Repositories
             if (liked)
             {
                 query.PostsNavigation.Add(postQuery);
+                await _dbContext.SaveChangesAsync();
+                likedResponse = true;
             }
             else
             {
                 query.PostsNavigation.Remove(postQuery);
-            }
-
-            if (await _dbContext.SaveChangesAsync() > 0)
-            {
-                likedResponse = true;
+                await _dbContext.SaveChangesAsync();
+                likedResponse = false;
             }
 
             return likedResponse;

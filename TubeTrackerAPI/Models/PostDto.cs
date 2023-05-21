@@ -18,6 +18,8 @@ namespace TubeTrackerAPI.Models
 
         public int LikesCount { get; set; }
 
+        public bool LikedByUser { get; set; }
+
         public virtual ICollection<PostComment> PostComments { get; set; }
     }
 }
