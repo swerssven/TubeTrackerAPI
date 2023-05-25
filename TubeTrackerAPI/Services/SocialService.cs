@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Repositories;
@@ -77,6 +78,15 @@ namespace TubeTrackerAPI.Services
             MessageDto messagesResponse = await socialRepository.getMessagesList(userId, friendUserId);
 
             return messagesResponse;
+        }
+
+        internal async Task<int> getNumberUnreadMessages(int userId)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            int unreadMessages = await socialRepository.getNumberUnreadMessages(userId);
+
+            return unreadMessages;
         }
 
         internal async Task<IEnumerable<PostDto>> GetPostsList(bool forFriends, int userId)

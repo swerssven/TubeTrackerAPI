@@ -12,7 +12,10 @@ namespace TubeTrackerAPI.Middleware
             if (account == null)
             {
                 // not logged in
-                context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                context.Result = new JsonResult(new { message = "Unauthorized" }) 
+                { 
+                    StatusCode = StatusCodes.Status401Unauthorized 
+                };
             }
         }
     }

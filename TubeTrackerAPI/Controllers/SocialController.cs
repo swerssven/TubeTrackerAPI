@@ -91,6 +91,16 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await socialService.getMessagesList(userId, friendUserId));
         }
 
+        //GET api/<SocialController>/getNumberUnreadMessages?userId=1
+        [Route("messages/getNumberUnreadMessages")]
+        [HttpGet]
+        public async Task<IActionResult> getNumberUnreadMessages(int userId)
+        {
+            SocialService socialService = new SocialService(_dbContext);
+
+            return Ok(await socialService.getNumberUnreadMessages(userId));
+        }
+
         //GET api/<SocialController>/getPosts/
         [Route("posts/getPostsList")]
         [HttpGet]

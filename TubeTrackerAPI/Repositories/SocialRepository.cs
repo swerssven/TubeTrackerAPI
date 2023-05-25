@@ -171,7 +171,14 @@ namespace TubeTrackerAPI.Repositories
             return response;
         }
 
-        //internal async Task<int> getNumberUnreadMessages() 
+        internal async Task<int> getNumberUnreadMessages(int userId)
+        {
+            int unreadMessages = await _dbContext.Messages
+                .Where(m => m.ReceiverUserId == userId && m.IsRead == false)
+                .CountAsync();
+
+            return unreadMessages;
+        }
 
         internal async Task<IEnumerable<PostDto>> GetPostsList(bool forFriends, int userId)
         {
