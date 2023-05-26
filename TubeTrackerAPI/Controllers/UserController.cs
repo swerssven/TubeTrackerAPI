@@ -3,6 +3,7 @@ using NuGet.Protocol;
 using TubeTrackerAPI.Middleware;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
+using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.Services;
 using TubeTrackerAPI.TubeTrackerContext;
@@ -63,6 +64,28 @@ namespace TubeTrackerAPI.Controllers
             UserStatisticsDto userStatisticsDto = await userService.GetUserStatistics(userId);
 
             return Ok(userStatisticsDto);
+        }
+
+        // POST api/<UserController>
+        [HttpPost]
+        [Route("EditUser")]
+        public async Task<IActionResult> EditUser([FromBody] EditUserRequest user)
+        {
+            EditUserResponse response = await new UserService(_tubeTrackerDbContext).EditUser(user);
+            if (response.Status == StatusEnum.Ok)
+            {
+                return Ok(response.user);
+            }
+            else if (response.Status == StatusEnum.EmailAlreadyExists ||
+                     response.Status == StatusEnum.NickNameAlreadyExists ||
+                     response.Status == StatusEnum.EmailAndNicknameAlreadyExist)
+            {
+                return BadRequest(response.Status.ToString());
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, response.Message);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using Azure.Core;
 using Microsoft.EntityFrameworkCore;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
+using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.Repositories;
 using TubeTrackerAPI.TubeTrackerContext;
@@ -109,6 +110,46 @@ namespace TubeTrackerAPI.Services
             }
 
             return userStatisticsDto;
+        }
+
+        internal async Task<EditUserResponse> EditUser(EditUserRequest user)
+        {
+            EditUserResponse response = new EditUserResponse();
+
+            try
+            {
+                UserRepository userRepository = new UserRepository(_tubeTrackerDbContext);
+                bool userEmail = await userRepository.CheckUserEmail(user.UserId, user.Email);
+                bool userNickname = await userRepository.CheckUserNickname(user.UserId, user.Nickname);
+
+                bool email = await userRepository.CheckEmail(user.Email);
+                bool nickname = await userRepository.CheckNickname(user.Nickname);
+
+                if (!userEmail && email)
+                {
+                    response.Status = StatusEnum.EmailAlreadyExists;
+                }
+                else if (!userNickname && nickname)
+                {
+                    response.Status = StatusEnum.NickNameAlreadyExists;
+                }
+                else if (!userEmail && !userNickname && email && nickname)
+                {
+                    response.Status = StatusEnum.EmailAndNicknameAlreadyExist;
+                }
+                else
+                {
+                    response.user = await userRepository.EditUser(user);
+                    response.Status = StatusEnum.Ok;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = StatusEnum.UnkownError;
+                response.Message = ex.ToString();
+            }
+
+            return response;
         }
     }
 }

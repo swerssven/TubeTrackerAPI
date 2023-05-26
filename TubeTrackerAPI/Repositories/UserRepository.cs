@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
+using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
@@ -54,9 +55,18 @@ namespace TubeTrackerAPI.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
+        internal async Task<bool> CheckUserEmail(int userId, string email)
+        {
+            return await _dbContext.Users.AnyAsync(a => a.Email == email && a.UserId == userId);
+        }
+
         internal async Task<bool> CheckEmail(string email)
         {
             return await _dbContext.Users.AnyAsync(a => a.Email == email);
+        }
+        internal async Task<bool> CheckUserNickname(int userId, string nickname)
+        {
+            return await _dbContext.Users.AnyAsync(a => a.Nickname == nickname && a.UserId == userId);
         }
 
         internal async Task<bool> CheckNickname(string nickname)
@@ -97,6 +107,38 @@ namespace TubeTrackerAPI.Repositories
             userStatisticsDto.Friends = await _dbContext.Friends.Where(f => f.UserId == userId && f.FriendshipStatus == (int)FriendshipStatus.Friends).CountAsync();
 
             return userStatisticsDto;
+        }
+
+        internal async Task<UserDto> EditUser(EditUserRequest user)
+        {
+            var query = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == user.UserId);
+            UserDto userResponse = new UserDto();
+
+            if (query != null)
+            {
+                query.Nickname = user.Nickname;
+                query.Password = user.Password;
+                query.Email = user.Email;
+                query.Language = user.Language;
+                query.Image = user.Image;
+
+                _dbContext.Update(query);
+                await _dbContext.SaveChangesAsync();
+
+                userResponse = new UserDto()
+                {
+                    UserId = query.UserId,
+                    FirstName = query.FirstName,
+                    LastName = query.LastName,
+                    Nickname = query.Nickname,
+                    Email = query.Email,
+                    Language = query.Language,
+                    Image = query.Image,
+                    RolId = query.RolId
+                };
+            }
+
+            return userResponse;
         }
     }
 }
