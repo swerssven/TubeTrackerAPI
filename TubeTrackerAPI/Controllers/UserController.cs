@@ -34,6 +34,18 @@ namespace TubeTrackerAPI.Controllers
             return Ok(userResponse);
         }
 
+        // GET api/<UserController>/GetUserList
+        [Authorize]
+        [HttpGet]
+        [Route("GetUserList")]
+        public async Task<IActionResult> GetUserList()
+        {
+            UserService userService = new UserService(_tubeTrackerDbContext);
+            List<usersGridDto> userResponse = await userService.GetUserList();
+
+            return Ok(userResponse);
+        }
+
         // POST api/<UserController>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] User user)

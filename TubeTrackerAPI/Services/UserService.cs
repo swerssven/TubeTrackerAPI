@@ -85,6 +85,33 @@ namespace TubeTrackerAPI.Services
             return userDto;
         }
 
+        internal async Task<List<usersGridDto>> GetUserList()
+        {
+            BaseResponse response = new BaseResponse();
+            List<usersGridDto> usersGridDto = new List<usersGridDto>();
+            try
+            {
+                UserRepository userRepository = new UserRepository(_tubeTrackerDbContext);
+                usersGridDto = await userRepository.GetUserList();
+
+                if (usersGridDto != null)
+                {
+                    response.Status = StatusEnum.Ok;
+                }
+                else
+                {
+                    response.Status = StatusEnum.UserNotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = StatusEnum.UnkownError;
+                response.Message = ex.ToString();
+            }
+
+            return usersGridDto;
+        }
+
         internal async Task<UserStatisticsDto> GetUserStatistics(int userId)
         {
             BaseResponse response = new BaseResponse();

@@ -49,6 +49,23 @@ namespace TubeTrackerAPI.Repositories
             return userResponse;
         }
 
+        internal async Task<List<usersGridDto>> GetUserList()
+        {
+            List<usersGridDto> userResponse = new List<usersGridDto>();
+            userResponse = await _dbContext.Users.Select(
+                u => new usersGridDto()
+                {
+                    UserId = u.UserId,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Nickname = u.Nickname,
+                    Email = u.Email,
+                    IsAdmin = !Convert.ToBoolean(u.RolId)
+                }).ToListAsync();
+
+            return userResponse;
+        }
+
         internal async Task CreateUser(User user)
         {
             _dbContext.Users.Add(user);
