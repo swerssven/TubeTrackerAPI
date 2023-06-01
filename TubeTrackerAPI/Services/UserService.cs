@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
@@ -71,7 +72,8 @@ namespace TubeTrackerAPI.Services
                 if (userDto != null)
                 {
                     response.Status = StatusEnum.Ok;
-                } else
+                }
+                else
                 {
                     response.Status = StatusEnum.UserNotExist;
                 }
@@ -177,6 +179,29 @@ namespace TubeTrackerAPI.Services
             }
 
             return response;
+        }
+
+        internal async Task<bool> MakeUserAdmin(int userId, bool isAdmin)
+        {
+            UserRepository userRepository = new UserRepository(_tubeTrackerDbContext);
+            bool response = await userRepository.MakeUserAdmin(userId, isAdmin);
+            return response;
+        }
+
+        internal async Task<bool> ChangeUserState(int userId, bool isActive)
+        {
+            UserRepository userRepository = new UserRepository(_tubeTrackerDbContext);
+            bool response = await userRepository.ChangeUserState(userId, isActive);
+            return response;
+        }
+
+        internal async Task<bool> DeleteUser(int userId)
+        {
+            UserRepository userRepository = new UserRepository(_tubeTrackerDbContext);
+
+            bool postsResponse = await userRepository.DeleteUser(userId);
+
+            return postsResponse;
         }
     }
 }

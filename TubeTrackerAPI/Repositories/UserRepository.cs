@@ -4,6 +4,7 @@ using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
+using TubeTrackerAPI.Services;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
 
@@ -156,6 +157,156 @@ namespace TubeTrackerAPI.Repositories
             }
 
             return userResponse;
+        }
+
+        internal async Task<bool> MakeUserAdmin(int userId, bool isAdmin)
+        {
+            var queryAdmin = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if(queryAdmin != null)
+            {
+                if (isAdmin)
+                {
+                    queryAdmin.RolId = (int)RolEnum.Admin;
+                }
+                else
+                {
+                    queryAdmin.RolId = (int)RolEnum.User;
+                }
+            }
+
+            if (await _dbContext.SaveChangesAsync() > 0)
+            {
+                return true;
+            }
+                
+            return false;
+        }
+
+        internal async Task<bool> ChangeUserState(int userId, bool isActive)
+        {
+            var queryUserState = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (queryUserState != null)
+            {
+                if (isActive)
+                {
+                    //queryUserState.isActive = (int)UserState.Active;
+                }
+                else
+                {
+                    //queryUserState.isActive = (int)UserState.Inactive;
+                }
+            }
+
+            if (await _dbContext.SaveChangesAsync() > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        internal async Task<bool> DeleteUser(int userId)
+        {
+            // Remove from Friends table.
+            var queryFriends = await _dbContext.Friends.Where(f => f.UserId == userId || f.FriendUserId == userId).ToListAsync();
+            if (queryFriends.Count() > 0)
+            {
+                _dbContext.Friends.RemoveRange(queryFriends);
+            }
+
+            // Remove from FavoriteMovies table.
+            var queryFavoriteMovies = await _dbContext.FavoriteMovies.Where(m => m.UserId == userId).ToListAsync();
+            if (queryFavoriteMovies.Count() > 0)
+            {
+                _dbContext.FavoriteMovies.RemoveRange(queryFavoriteMovies);
+            }
+
+            // Remove from FavoriteSeries table.
+            var queryFavoriteSeries = await _dbContext.FavoriteSeries.Where(s => s.UserId == userId).ToListAsync();
+            if (queryFavoriteSeries.Count() > 0)
+            {
+                _dbContext.FavoriteSeries.RemoveRange(queryFavoriteSeries);
+            }
+
+            // Remove from Messages table.
+            var queryMessages = await _dbContext.Messages.Where(x => x.SenderUserId == userId ||x.ReceiverUserId == userId).ToListAsync();
+            if (queryMessages.Count() > 0)
+            {
+                _dbContext.Messages.RemoveRange(queryMessages);
+            }
+
+            // Remove from MovieRatings table.
+            var queryMovieRatings = await _dbContext.MovieRatings.Where(x => x.UserId == userId).ToListAsync();
+            if (queryMovieRatings.Count() > 0)
+            {
+                _dbContext.MovieRatings.RemoveRange(queryMovieRatings);
+            }
+
+            // Remove from SerieRatings table.
+            var querySerieRatings = await _dbContext.SerieRatings.Where(x => x.UserId == userId).ToListAsync();
+            if (querySerieRatings.Count() > 0)
+            {
+                _dbContext.SerieRatings.RemoveRange(querySerieRatings);
+            }
+
+            // Remove from MovieReviews table.
+            var queryMovieReviews = await _dbContext.MovieReviews.Where(x => x.UserId == userId).ToListAsync();
+            if (queryMovieReviews.Count() > 0)
+            {
+                _dbContext.MovieReviews.RemoveRange(queryMovieReviews);
+            }
+
+            // Remove from SerieReviews table.
+            var querySerieReviews = await _dbContext.SerieReviews.Where(x => x.UserId == userId).ToListAsync();
+            if (querySerieReviews.Count() > 0)
+            {
+                _dbContext.SerieReviews.RemoveRange(querySerieReviews);
+            }
+
+            // Remove from News table.
+            var queryNews = await _dbContext.News.Where(x => x.UserId == userId).ToListAsync();
+            if (queryNews.Count() > 0)
+            {
+                _dbContext.News.RemoveRange(queryNews);
+            }
+
+            // Remove from WatchedMovies table.
+            var queryWatchedMovies = await _dbContext.WatchedMovies.Where(x => x.UserId == userId).ToListAsync();
+            if (queryWatchedMovies.Count() > 0)
+            {
+                _dbContext.WatchedMovies.RemoveRange(queryWatchedMovies);
+            }
+
+            // Remove from WatchedSeriesSeasonsEpisodes table.
+            var queryWatchedSeriesSeasonsEpisodes = await _dbContext.WatchedSeriesSeasonsEpisodes.Where(x => x.UserId == userId).ToListAsync();
+            if (queryWatchedSeriesSeasonsEpisodes.Count() > 0)
+            {
+                _dbContext.WatchedSeriesSeasonsEpisodes.RemoveRange(queryWatchedSeriesSeasonsEpisodes);
+            }
+
+            // Remove from Posts table.
+            SocialService socialService = new SocialService(_dbContext);
+            var queryPosts = await _dbContext.Posts.Where(x => x.UserId == userId).Select(x => x.PostId).ToListAsync();
+            if(queryPosts.Count() > 0)
+            {
+                foreach (var post in queryPosts)
+                {
+                    await socialService.deletePost(post);
+                }
+            }
+
+            // Remove from User table.
+            var queryUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (queryUser != null)
+            {
+                _dbContext.Users.Remove(queryUser);
+            }
+
+            if (await _dbContext.SaveChangesAsync() > 0)
+            {
+                return true;
+            };
+            return false; ;
         }
     }
 }

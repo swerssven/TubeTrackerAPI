@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NuGet.Protocol;
 using TubeTrackerAPI.Middleware;
 using TubeTrackerAPI.Models;
@@ -11,7 +12,6 @@ using TubeTrackerAPI.TubeTrackerEntities;
 
 namespace TubeTrackerAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -24,7 +24,7 @@ namespace TubeTrackerAPI.Controllers
         }
 
         // GET api/<UserController>/5
-        [Authorize]
+        [Middleware.Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> Get([FromRoute]int id)
         {
@@ -35,7 +35,7 @@ namespace TubeTrackerAPI.Controllers
         }
 
         // GET api/<UserController>/GetUserList
-        [Authorize]
+        [Middleware.Authorize]
         [HttpGet]
         [Route("GetUserList")]
         public async Task<IActionResult> GetUserList()
@@ -47,7 +47,9 @@ namespace TubeTrackerAPI.Controllers
         }
 
         // POST api/<UserController>
+        [AllowAnonymous]
         [HttpPost]
+        [Route("CreateUser")]
         public async Task<IActionResult> Post([FromBody] User user)
         {
             BaseResponse response = await new UserService(_tubeTrackerDbContext).CreateUser(user);
@@ -68,6 +70,7 @@ namespace TubeTrackerAPI.Controllers
         }
 
         // GET api/<UserController>/GetUserStatistics?userId=3
+        [Middleware.Authorize]
         [Route("GetUserStatistics")]
         [HttpGet]
         public async Task<IActionResult> GetUserStatistics([FromQuery] int userId)
@@ -79,6 +82,7 @@ namespace TubeTrackerAPI.Controllers
         }
 
         // POST api/<UserController>
+        [Middleware.Authorize]
         [HttpPost]
         [Route("EditUser")]
         public async Task<IActionResult> EditUser([FromBody] EditUserRequest user)
@@ -98,6 +102,41 @@ namespace TubeTrackerAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, response.Message);
             }
+        }
+
+        // POST api/<UserController>/MakeUserAdmin?userId=1&isAdmin=true
+        [Middleware.Authorize]
+        [HttpPost]
+        [Route("MakeUserAdmin")]
+        public async Task<IActionResult> MakeUserAdmin([FromQuery] int userId, [FromQuery] bool isAdmin)
+        {
+            UserService userService = new UserService(_tubeTrackerDbContext);
+            bool response = await userService.MakeUserAdmin(userId, isAdmin);
+
+            return Ok(response);
+        }
+
+        // POST api/<UserController>/ChangeUserState?userId=1&isActive=false
+        [Middleware.Authorize]
+        [HttpPost]
+        [Route("ChangeUserState")]
+        public async Task<IActionResult> ChangeUserState([FromQuery] int userId, [FromQuery] bool isActive)
+        {
+            UserService userService = new UserService(_tubeTrackerDbContext);
+            bool response = await userService.ChangeUserState(userId, isActive);
+
+            return Ok(response);
+        }
+
+        //DELETE api/<UserController>/DeleteUser?userId=3
+        [Middleware.Authorize]
+        [Route("DeleteUser")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser([FromQuery] int userId)
+        {
+            UserService userService = new UserService(_tubeTrackerDbContext);
+
+            return Ok(await userService.DeleteUser(userId));
         }
     }
 }
