@@ -268,6 +268,7 @@ namespace TubeTrackerAPI.Repositories
             List<PostCommentDto> postCommentsList = await _dbContext.PostComments.Where(p => p.PostId == postId).OrderBy(p => p.CreationDate)
                 .Select(p => new PostCommentDto()
                 {
+                    PostCommnentsId = p.PostCommnentsId,
                     PostId = p.PostId,
                     Content = p.Content,
                     UserId = p.UserId,
@@ -299,6 +300,48 @@ namespace TubeTrackerAPI.Repositories
             }
 
             return likedResponse;
+        }
+
+        internal async Task<bool> deletePost(int postId)
+        {
+            var queryPostLikes = await _dbContext.Posts.Include(x => x.Users).FirstOrDefaultAsync(p => p.PostId == postId);
+            if (queryPostLikes != null)
+            {
+                queryPostLikes.Users.Clear();
+            }
+
+            var queryPostComments = await _dbContext.PostComments.Where(p => p.PostId == postId).ToListAsync();
+            if(queryPostComments.Count() > 0)
+            {
+                _dbContext.PostComments.RemoveRange(queryPostComments);
+            }
+
+            var queryPosts = await _dbContext.Posts.Where(p => p.PostId == postId).FirstOrDefaultAsync();
+            if (queryPosts != null)
+            {
+                _dbContext.Remove(queryPosts);
+            }
+
+            if (await _dbContext.SaveChangesAsync() > 0)
+            {
+                return true;
+            };
+            return false; ;
+        }
+
+        internal async Task<bool> deletePostComment(int postCommnentsId)
+        {
+            var queryPostComments = await _dbContext.PostComments.Where(p => p.PostCommnentsId == postCommnentsId).ToListAsync();
+            if (queryPostComments.Count() > 0)
+            {
+                _dbContext.RemoveRange(queryPostComments);
+            }
+
+            if (await _dbContext.SaveChangesAsync() > 0)
+            {
+                return true;
+            };
+            return false; ;
         }
     }
 }

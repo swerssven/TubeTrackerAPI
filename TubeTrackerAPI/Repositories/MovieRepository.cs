@@ -181,6 +181,21 @@ namespace TubeTrackerAPI.Repositories
             return movieReviewDto;
         }
 
+        public async Task<bool> DeleteMovieReview(int movieReviewId)
+        {
+            var queryMovieReview = await _dbContext.MovieReviews.Where(m => m.MovieReviewId == movieReviewId).FirstOrDefaultAsync();
+            if (queryMovieReview != null)
+            {
+                _dbContext.Remove(queryMovieReview);
+            }
+
+            if (await _dbContext.SaveChangesAsync() > 0)
+            {
+                return true;
+            };
+            return false; ;
+        }
+
         public async Task<MovieReviewDto> CreateMovieReviewList(CreateMovieReviewListRequest request)
         {
             var movieQuery = await _dbContext.Movies.Include(m => m.MovieReviews).Where(m => m.MovieApiId == request.MovieApiId).FirstOrDefaultAsync();

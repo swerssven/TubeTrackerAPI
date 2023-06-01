@@ -259,6 +259,21 @@ namespace TubeTrackerAPI.Repositories
             return serieReview;
         }
 
+        public async Task<bool> DeleteSerieReview(int serieReviewId)
+        {
+            var querySerieReview = await _dbContext.SerieReviews.Where(m => m.SerieReviewId == serieReviewId).FirstOrDefaultAsync();
+            if (querySerieReview != null)
+            {
+                _dbContext.Remove(querySerieReview);
+            }
+
+            if (await _dbContext.SaveChangesAsync() > 0)
+            {
+                return true;
+            };
+            return false; ;
+        }
+
         public async Task<SerieReviewDto> CreateSerieReviewList(CreateSerieReviewListRequest request)
         {
             var serieQuery = await _dbContext.Series.Include(m => m.SerieReviews).Where(m => m.SerieApiId == request.SerieApiId).FirstOrDefaultAsync();

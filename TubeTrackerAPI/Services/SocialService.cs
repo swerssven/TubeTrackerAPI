@@ -139,5 +139,23 @@ namespace TubeTrackerAPI.Services
 
             return likedResponse;
         }
+
+        internal async Task<bool> deletePost(int postId)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            bool postsResponse = await socialRepository.deletePost(postId);
+
+            return postsResponse;
+        }
+
+        internal async Task<bool> deletePostComment(int postCommnentsId)
+        {
+            SocialRepository socialRepository = new SocialRepository(_dbContext);
+
+            bool postsResponse = await socialRepository.deletePostComment(postCommnentsId);
+
+            return postsResponse;
+        }
     }
 }

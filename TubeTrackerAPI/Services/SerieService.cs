@@ -150,6 +150,13 @@ namespace TubeTrackerAPI.Services
             return serieReviewResponse;
         }
 
+        public async Task<bool> DeleteSerieReview(int serieReviewId)
+        {
+            bool SerieReviewResponse = await _repository.DeleteSerieReview(serieReviewId);
+
+            return SerieReviewResponse;
+        }
+
         public async Task<SerieReviewDto> CreateSerieReviewList(CreateSerieReviewListRequest request)
         {
             SerieRepository serieRepository = new SerieRepository(_dbContext);

@@ -150,5 +150,25 @@ namespace TubeTrackerAPI.Controllers
 
             return Ok(await socialService.createPostLike(userId, postId, liked));
         }
+
+        //DELETE api/<SocialController>/deletePost?postId=3
+        [Route("posts/deletePost")]
+        [HttpDelete]
+        public async Task<IActionResult> deletePost([FromQuery] int postId)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.deletePost(postId));
+        }
+
+        //DELETE api/<SocialController>/deletePostComment?postCommnentsId=3
+        [Route("posts/deletePostComment")]
+        [HttpDelete]
+        public async Task<IActionResult> deletePostComment([FromQuery] int postCommnentsId)
+        {
+            SocialService socialService = new SocialService(this._dbContext);
+
+            return Ok(await socialService.deletePostComment(postCommnentsId));
+        }
     }
 }

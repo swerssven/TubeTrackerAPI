@@ -117,6 +117,13 @@ namespace TubeTrackerAPI.Services
             return movieReviewResponse;
         }
 
+        public async Task<bool> DeleteMovieReview(int movieReviewId)
+        {
+            bool movieReviewResponse = await _repository.DeleteMovieReview(movieReviewId);
+
+            return movieReviewResponse;
+        }
+
         public async Task<MovieReviewDto> CreateMovieReviewList(CreateMovieReviewListRequest request)
         {
             MovieRepository movieRepository = new MovieRepository(_dbContext);

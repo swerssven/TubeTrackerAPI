@@ -74,6 +74,16 @@ namespace TubeTrackerAPI.Controllers
             return Ok(await movieService.CreateMovieReviewList(request));
         }
 
+        //DELETE api/<MovieController>/DeleteMovieReview?movieReviewId=3
+        [Route("DeleteMovieReview")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteMovieReview([FromQuery] int movieReviewId)
+        {
+            MovieService movieService = new MovieService(this._dbContext);
+
+            return Ok(await movieService.DeleteMovieReview(movieReviewId));
+        }
+
         // POST api/<MovieController>/setMovieRating?movieApiId=76600&userId=1&rating=5
         [Route("setMovieRating")]
         [HttpPost]
