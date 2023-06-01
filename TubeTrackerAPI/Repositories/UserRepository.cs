@@ -61,7 +61,8 @@ namespace TubeTrackerAPI.Repositories
                     LastName = u.LastName,
                     Nickname = u.Nickname,
                     Email = u.Email,
-                    IsAdmin = !Convert.ToBoolean(u.RolId)
+                    IsAdmin = !Convert.ToBoolean(u.RolId),
+                    IsActive = u.IsActive
                 }).ToListAsync();
 
             return userResponse;
@@ -82,6 +83,7 @@ namespace TubeTrackerAPI.Repositories
         {
             return await _dbContext.Users.AnyAsync(a => a.Email == email);
         }
+
         internal async Task<bool> CheckUserNickname(int userId, string nickname)
         {
             return await _dbContext.Users.AnyAsync(a => a.Nickname == nickname && a.UserId == userId);
@@ -189,11 +191,11 @@ namespace TubeTrackerAPI.Repositories
             {
                 if (isActive)
                 {
-                    //queryUserState.isActive = (int)UserState.Active;
+                    queryUserState.IsActive = Convert.ToBoolean(UserState.Active);
                 }
                 else
                 {
-                    //queryUserState.isActive = (int)UserState.Inactive;
+                    queryUserState.IsActive = Convert.ToBoolean(UserState.Inactive);
                 }
             }
 

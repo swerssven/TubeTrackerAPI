@@ -77,7 +77,7 @@ namespace TubeTrackerAPI.Controllers
 
         //DELETE api/<SerieController>/DeleteSerieReview?SerieReviewId=3
         [Route("DeleteSerieReview")]
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> DeleteSerieReview([FromQuery] int serieReviewId)
         {
             SerieService SerieService = new SerieService(this._dbContext);

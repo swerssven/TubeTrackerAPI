@@ -131,7 +131,7 @@ namespace TubeTrackerAPI.Controllers
         //DELETE api/<UserController>/DeleteUser?userId=3
         [Middleware.Authorize]
         [Route("DeleteUser")]
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> DeleteUser([FromQuery] int userId)
         {
             UserService userService = new UserService(_tubeTrackerDbContext);

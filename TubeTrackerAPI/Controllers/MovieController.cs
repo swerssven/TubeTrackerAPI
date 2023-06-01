@@ -76,7 +76,7 @@ namespace TubeTrackerAPI.Controllers
 
         //DELETE api/<MovieController>/DeleteMovieReview?movieReviewId=3
         [Route("DeleteMovieReview")]
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> DeleteMovieReview([FromQuery] int movieReviewId)
         {
             MovieService movieService = new MovieService(this._dbContext);

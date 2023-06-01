@@ -25,6 +25,8 @@ public partial class User
 
     public DateTime RegistryDate { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual ICollection<FavoriteMovie> FavoriteMovies { get; } = new List<FavoriteMovie>();
 
     public virtual ICollection<FavoriteSeries> FavoriteSeries { get; } = new List<FavoriteSeries>();

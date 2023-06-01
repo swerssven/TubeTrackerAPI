@@ -382,6 +382,7 @@ public partial class TubeTrackerDbContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.Image).IsUnicode(false);
+            entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
             entity.Property(e => e.Language)
                 .IsRequired()
                 .HasMaxLength(255)
