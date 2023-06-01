@@ -164,11 +164,11 @@ namespace TubeTrackerAPI.Controllers
         //DELETE api/<SocialController>/deletePostComment?postCommnentsId=3
         [Route("posts/deletePostComment")]
         [HttpPost]
-        public async Task<IActionResult> deletePostComment([FromQuery] int postCommnentsId)
+        public async Task<IActionResult> deletePostComment([FromQuery] int postCommentId)
         {
             SocialService socialService = new SocialService(this._dbContext);
 
-            return Ok(await socialService.deletePostComment(postCommnentsId));
+            return Ok(await socialService.deletePostComment(postCommentId));
         }
     }
 }

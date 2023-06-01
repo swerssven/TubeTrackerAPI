@@ -252,6 +252,7 @@ namespace TubeTrackerAPI.Repositories
             List<PostCommentDto> postCommentsList = await _dbContext.PostComments.Where(p => p.PostId == postComment.PostId).OrderBy(p => p.CreationDate)
                 .Select(p => new PostCommentDto()
                 {
+                    PostCommnentsId = p.PostCommnentsId,
                     PostId = postComment.PostId,
                     Content = p.Content,
                     UserId = p.UserId,
