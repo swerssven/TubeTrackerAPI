@@ -23,7 +23,7 @@ namespace TubeTrackerAPI.Repositories
         {
             int? result = null;
 
-            var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email.Equals(username) && x.Password.Equals(password));
+            var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email.Equals(username) && x.Password.Equals(password) && x.IsActive == true);
 
             if (user != null)
             {
