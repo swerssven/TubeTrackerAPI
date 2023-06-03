@@ -32,17 +32,17 @@ namespace TubeTrackerAPI.Controllers
         // GET api/<SerieController>/getSeriePopularListt?page=1&language=es-ES
         [Route("getSeriePopularList")]
         [HttpGet]
-        public async Task<IActionResult> GetSeriePopularListAsync([FromQuery] string language, [FromQuery] int userId)
+        public async Task<IActionResult> GetSeriePopularListAsync([FromQuery] int userId)
         {
-            return Ok(await new SerieService(_dbContext).GetSeriePopularList(language, userId));
+            return Ok(await new SerieService(_dbContext).GetSeriePopularList(userId));
         }
 
         // GET api/<SerieController>/getSerieTopRatedList?page=1&language=es-ES
         [Route("getSerieTopRatedList")]
         [HttpGet]
-        public async Task<IActionResult> GetSerieTopRatedListAsync([FromQuery] string language, [FromQuery] int userId)
+        public async Task<IActionResult> GetSerieTopRatedListAsync([FromQuery] int userId)
         {
-            return Ok(await new SerieService(_dbContext).GetSerieTopRatedList(language, userId));
+            return Ok(await new SerieService(_dbContext).GetSerieTopRatedList(userId));
         }
 
         // GET api/<SerieController>?id=5&language=es-ES

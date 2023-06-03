@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
@@ -40,46 +41,84 @@ namespace TubeTrackerAPI.Repositories
             }
         }
 
-        public async Task<string> GetSeriePopularList(string language)
+        public async Task<SerieResponse> GetSeriePopularList()
         {
-            Random rnd = new Random();
-            string apiURL = $"/discover/tv?api_key={apiKey}&with_original_language=en&sort_by=popularity.desc&language={language}&page={rnd.Next(1, 5)}";
+            SerieResponse serieResponse = new SerieResponse();
+            serieResponse.Results = new List<ExternalSerie>();
+            var query = @"
+                SELECT TOP 20 s.*, 
+                    ISNULL(f.FavoriteCount, 0) AS FavoriteCount, 
+                    ISNULL(w.WatchedCount, 0) AS WatchedCount
+                FROM Series AS s
+                LEFT JOIN (
+                    SELECT SerieId, COUNT(*) AS FavoriteCount
+                    FROM FavoriteSeries
+                    GROUP BY SerieId
+                ) AS f ON s.SerieId = f.SerieId
+                LEFT JOIN (
+                    SELECT SerieId, COUNT(*) AS WatchedCount
+                    FROM WatchedSeriesSeasonsEpisodes
+                    GROUP BY SerieId
+                ) AS w ON s.SerieId = w.SerieId
+                ORDER BY ISNULL(f.FavoriteCount, 0) DESC, ISNULL(w.WatchedCount, 0) DESC";
 
-            using (var client = new HttpClient())
+            var popularSeries = await _dbContext.Series
+                .FromSqlRaw(query)
+                .ToListAsync();
+
+            foreach (var m in popularSeries)
             {
-                using (var response = await client.GetAsync(URL + apiURL))
+                DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
+                string formattedDate = date.ToString("yyyy-MM-dd");
+                ExternalSerie externalSerie = new ExternalSerie()
                 {
-                    string apiResponse = string.Empty;
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        apiResponse = await response.Content.ReadAsStringAsync();
-                    }
-
-                    return apiResponse;
-                }
+                    id = m.SerieApiId,
+                    name = (m.TitleEn != null ? m.TitleEn : m.TitleEs),
+                    first_air_date = formattedDate,
+                    poster_path = m.Poster,
+                    backdrop_path = m.Backdrop
+                };
+                serieResponse.Results.Add(externalSerie);
             }
+
+            return serieResponse;
         }
 
-        public async Task<string> GetSerieTopRatedList(string language)
+        public async Task<SerieResponse> GetSerieTopRatedList()
         {
-            Random rnd = new Random();
-            string apiURL = $"/tv/top_rated?api_key={apiKey}&language={language}&page={rnd.Next(1, 5)}";
+            SerieResponse serieResponse = new SerieResponse();
+            serieResponse.Results = new List<ExternalSerie>();
+            var query = @"
+                SELECT TOP 20 m.*, 
+                    ISNULL(r.RatingCount, 0) AS RatingCount
+                FROM Series AS m
+                LEFT JOIN (
+                    SELECT SerieId, COUNT(*) AS RatingCount
+                    FROM SerieRatings
+                    GROUP BY SerieId
+                ) AS r ON m.SerieId = r.SerieId
+                ORDER BY ISNULL(r.RatingCount, 0) DESC";
 
-            using (var client = new HttpClient())
+            var topRatedSeries = await _dbContext.Series
+                .FromSqlRaw(query)
+                .ToListAsync();
+
+            foreach (var m in topRatedSeries)
             {
-                using (var response = await client.GetAsync(URL + apiURL))
+                DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
+                string formattedDate = date.ToString("yyyy-MM-dd");
+                ExternalSerie externalSerie = new ExternalSerie()
                 {
-                    string apiResponse = string.Empty;
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        apiResponse = await response.Content.ReadAsStringAsync();
-                    }
-
-                    return apiResponse;
-                }
+                    id = m.SerieApiId,
+                    name = (m.TitleEn != null ? m.TitleEn : m.TitleEs),
+                    first_air_date = formattedDate,
+                    poster_path = m.Poster,
+                    backdrop_path = m.Backdrop
+                };
+                serieResponse.Results.Add(externalSerie);
             }
+
+            return serieResponse;
         }
 
         // Create new serie in data base

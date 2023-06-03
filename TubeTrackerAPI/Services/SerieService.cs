@@ -30,23 +30,23 @@ namespace TubeTrackerAPI.Services
             return serieResponse;
         }
 
-        public async Task<SerieResponse> GetSeriePopularList(string language, int userId)
+        public async Task<SerieResponse> GetSeriePopularList(int userId)
         {
-            string resultStr = await new SerieRepository(this._dbContext).GetSeriePopularList(language);
+            SerieRepository serieRepository = new SerieRepository(_dbContext);
 
-            SerieResponse serieResponse = JsonConvert.DeserializeObject<SerieResponse>(resultStr);
-
+            SerieResponse serieResponse = new SerieResponse();
+            serieResponse = await serieRepository.GetSeriePopularList();
             serieResponse = await _repository.checkWatchedAndFavoriteSeriesFromList(serieResponse, userId);
 
             return serieResponse;
         }
 
-        public async Task<SerieResponse> GetSerieTopRatedList(string language, int userId)
+        public async Task<SerieResponse> GetSerieTopRatedList(int userId)
         {
-            string resultStr = await new SerieRepository(this._dbContext).GetSerieTopRatedList(language);
+            SerieRepository serieRepository = new SerieRepository(_dbContext);
 
-            SerieResponse serieResponse = JsonConvert.DeserializeObject<SerieResponse>(resultStr);
-
+            SerieResponse serieResponse = new SerieResponse();
+            serieResponse = await serieRepository.GetSerieTopRatedList();
             serieResponse = await _repository.checkWatchedAndFavoriteSeriesFromList(serieResponse, userId);
 
             return serieResponse;

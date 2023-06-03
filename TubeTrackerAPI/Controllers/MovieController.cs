@@ -31,17 +31,17 @@ namespace TubeTrackerAPI.Controllers
         // GET api/<MovieController>/getMoviePopularList?page=1&language=es-ES
         [Route("getMoviePopularList")]
         [HttpGet]
-        public async Task<IActionResult> GetMoviePopularListAsync([FromQuery] string language, [FromQuery] int userId)
+        public async Task<IActionResult> GetMoviePopularListAsync([FromQuery] int userId)
         {
-            return Ok(await new MovieService(_dbContext).GetMoviePopularList(language, userId));
+            return Ok(await new MovieService(_dbContext).GetMoviePopularList(userId));
         }
 
         // GET api/<MovieController>getMovieTopRatedList?page=1&language=es-ES
         [Route("getMovieTopRatedList")]
         [HttpGet]
-        public async Task<IActionResult> GetMovieTopRatedListAsync([FromQuery] string language, [FromQuery] int userId)
+        public async Task<IActionResult> GetMovieTopRatedListAsync([FromQuery] int userId)
         {
-            return Ok(await new MovieService(_dbContext).GetMovieTopRatedList(language, userId));
+            return Ok(await new MovieService(_dbContext).GetMovieTopRatedList(userId));
         }
 
         // GET api/<MovieController>?id=5&language=es-ES

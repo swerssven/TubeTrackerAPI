@@ -31,23 +31,23 @@ namespace TubeTrackerAPI.Services
             return movieResponse;
         }
 
-        public async Task<MovieResponse> GetMoviePopularList(string language, int userId)
+        public async Task<MovieResponse> GetMoviePopularList(int userId)
         {
-            string resultStr = await new MovieRepository(this._dbContext).GetMoviePopularList(language);
+            MovieRepository movieRepository = new MovieRepository(_dbContext);
 
-            MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
-
+            MovieResponse movieResponse = new MovieResponse(); 
+            movieResponse = await movieRepository.GetMoviePopularList();
             movieResponse = await _repository.checkWatchedAndFavoriteMoviesFromList(movieResponse, userId);
 
             return movieResponse;
         }
 
-        public async Task<MovieResponse> GetMovieTopRatedList(string language, int userId)
+        public async Task<MovieResponse> GetMovieTopRatedList(int userId)
         {
-            string resultStr = await _repository.GetMovieTopRatedList(language);
+            MovieRepository movieRepository = new MovieRepository(_dbContext);
 
-            MovieResponse movieResponse = JsonConvert.DeserializeObject<MovieResponse>(resultStr);
-
+            MovieResponse movieResponse = new MovieResponse();
+            movieResponse = await movieRepository.GetMovieTopRatedList();
             movieResponse = await _repository.checkWatchedAndFavoriteMoviesFromList(movieResponse, userId);
 
             return movieResponse;

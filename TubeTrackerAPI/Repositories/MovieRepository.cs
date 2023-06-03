@@ -2,6 +2,8 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Request;
 using TubeTrackerAPI.Models.Response;
@@ -43,46 +45,84 @@ namespace TubeTrackerAPI.Repositories
             }
         }
 
-        public async Task<string> GetMoviePopularList(string language)
+        public async Task<MovieResponse> GetMoviePopularList()
         {
-            Random rnd = new Random();
-            string apiURL = $"/movie/popular?api_key={apiKey}&language={language}&page={rnd.Next(1, 5)}";
+            MovieResponse movieResponse = new MovieResponse();
+            movieResponse.Results = new List<ExternalMovie>();
+            var query = @"
+                SELECT TOP 20 m.*, 
+                    ISNULL(w.WatchCount, 0) AS WatchCount, 
+                    ISNULL(f.FavoriteCount, 0) AS FavoriteCount
+                FROM Movies AS m
+                LEFT JOIN (
+                    SELECT MovieId, COUNT(*) AS WatchCount
+                    FROM WatchedMovies
+                    GROUP BY MovieId
+                ) AS w ON m.MovieId = w.MovieId
+                LEFT JOIN (
+                    SELECT MovieId, COUNT(*) AS FavoriteCount
+                    FROM FavoriteMovies
+                    GROUP BY MovieId
+                ) AS f ON m.MovieId = f.MovieId
+                ORDER BY (ISNULL(w.WatchCount, 0) + ISNULL(f.FavoriteCount, 0)) DESC";
 
-            using (var client = new HttpClient())
+            var popularMovies = await _dbContext.Movies
+                .FromSqlRaw(query)
+                .ToListAsync();
+
+            foreach (var m in popularMovies)
             {
-                using (var response = await client.GetAsync(URL + apiURL))
+                DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
+                string formattedDate = date.ToString("yyyy-MM-dd");
+                ExternalMovie externalMovie = new ExternalMovie()
                 {
-                    string apiResponse = string.Empty;
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        apiResponse = await response.Content.ReadAsStringAsync();
-                    }
-
-                    return apiResponse;
-                }
+                    id = m.MovieApiId,
+                    title = (m.TitleEn != null ? m.TitleEn : m.TitleEs),
+                    release_date = formattedDate,
+                    poster_path = m.Poster,
+                    backdrop_path = m.Backdrop
+                };
+                movieResponse.Results.Add(externalMovie);
             }
+
+            return movieResponse;
         }
 
-        public async Task<string> GetMovieTopRatedList(string language)
+        public async Task<MovieResponse> GetMovieTopRatedList()
         {
-            Random rnd = new Random();
-            string apiURL = $"/movie/top_rated?api_key={apiKey}&language={language}&page={rnd.Next(1, 5)}";
+            MovieResponse movieResponse = new MovieResponse();
+            movieResponse.Results = new List<ExternalMovie>();
+            var query = @"
+                SELECT TOP 20 m.*, 
+                    ISNULL(r.RatingCount, 0) AS RatingCount
+                FROM Movies AS m
+                LEFT JOIN (
+                    SELECT MovieId, COUNT(*) AS RatingCount
+                    FROM MovieRatings
+                    GROUP BY MovieId
+                ) AS r ON m.MovieId = r.MovieId
+                ORDER BY ISNULL(r.RatingCount, 0) DESC";
 
-            using (var client = new HttpClient())
+            var topRatedMovies = await _dbContext.Movies
+                .FromSqlRaw(query)
+                .ToListAsync();
+
+            foreach (var m in topRatedMovies)
             {
-                using (var response = await client.GetAsync(URL + apiURL))
+                DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
+                string formattedDate = date.ToString("yyyy-MM-dd");
+                ExternalMovie externalMovie = new ExternalMovie()
                 {
-                    string apiResponse = string.Empty;
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        apiResponse = await response.Content.ReadAsStringAsync();
-                    }
-
-                    return apiResponse;
-                }
+                    id = m.MovieApiId,
+                    title = (m.TitleEn != null ? m.TitleEn : m.TitleEs),
+                    release_date = formattedDate,
+                    poster_path = m.Poster,
+                    backdrop_path = m.Backdrop
+                };
+                movieResponse.Results.Add(externalMovie);
             }
+
+            return movieResponse;
         }
 
         // Create new movie in data base
