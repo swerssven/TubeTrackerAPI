@@ -698,7 +698,7 @@ namespace TubeTrackerAPI.Repositories
                     Select(s => s.DateAdded).FirstOrDefaultAsync();
             }
 
-            return watchedSerieList.Take(12);
+            return watchedSerieList.Take(6);
         }
     }
 }

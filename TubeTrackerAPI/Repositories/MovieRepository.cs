@@ -521,7 +521,7 @@ namespace TubeTrackerAPI.Repositories
         // Get user's last 12 watched movies.
         public async Task<IEnumerable<ExternalMovie>> getLastWatchedMoviesList(int userId, string language)
         {
-            List<int> movieIds = await _dbContext.WatchedMovies.OrderByDescending(m => m.DateWatched).Take(12).Where(f => f.UserId == userId).Select(m => m.MovieId).ToListAsync();
+            List<int> movieIds = await _dbContext.WatchedMovies.OrderByDescending(m => m.DateWatched).Take(6).Where(f => f.UserId == userId).Select(m => m.MovieId).ToListAsync();
             IEnumerable<ExternalMovie> watchedMovieList = new List<ExternalMovie>();
 
             if (language == "en-EN")
