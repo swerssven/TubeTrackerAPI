@@ -48,16 +48,32 @@ namespace TubeTrackerAPI.Repositories
             return UserList.OrderBy(f => f.FriendshipStatus);
         }
 
-        internal async Task<IEnumerable<FriendDto>> GetFriendsList(int userId)
+        internal async Task<IEnumerable<FriendDto>> GetFriendsList(int userId, bool suggestions)
         {
-            IEnumerable<FriendDto> friendList = await _dbContext.Friends.Where(f => f.UserId == userId)
-                .Select(f => new FriendDto()
-                {
-                    UserId = f.FriendUserId,
-                    FriendNickname = f.FriendUser.Nickname,
-                    FriendImage = f.FriendUser.Image,
-                    FriendshipStatus = f.FriendshipStatus
-                }).OrderByDescending(f => f.FriendshipStatus).ToListAsync();
+            IEnumerable<FriendDto> friendList = new List<FriendDto>();
+            if (!suggestions)
+            {
+                friendList = await _dbContext.Friends.Where(f => f.UserId == userId)
+                    .Select(f => new FriendDto()
+                    {
+                        UserId = f.FriendUserId,
+                        FriendNickname = f.FriendUser.Nickname,
+                        FriendImage = f.FriendUser.Image,
+                        FriendshipStatus = f.FriendshipStatus
+                    }).OrderByDescending(f => f.FriendshipStatus).ToListAsync();
+            }
+            else
+            {
+                friendList = await _dbContext.Users
+    .Where(user => user.UserId != userId && !_dbContext.Friends.Any(friend => friend.UserId == userId && friend.FriendUserId == user.UserId))
+                    .Select(f => new FriendDto()
+                    {
+                        UserId = f.UserId,
+                        FriendNickname = f.Nickname,
+                        FriendImage = f.Image,
+                        FriendshipStatus = 2
+                    }).ToListAsync();
+            }
 
             return friendList;
         }
@@ -106,26 +122,49 @@ namespace TubeTrackerAPI.Repositories
             return friend;
         }
 
-        internal async Task<FriendDto> AcceptFriendship(int userId, int friendUserId)
+        internal async Task<FriendDto> AcceptFriendship(int userId, int friendUserId, bool accept)
         {
             var friendsQuery1 = await _dbContext.Friends.Where(f => f.UserId == userId && f.FriendUserId == friendUserId).FirstOrDefaultAsync();
             var friendsQuery2 = await _dbContext.Friends.Where(f => f.UserId == friendUserId && f.FriendUserId == userId).FirstOrDefaultAsync();
+            if (accept)
+            {
+                friendsQuery1.FriendshipStatus = (int)FriendshipStatus.Friends;
+                friendsQuery2.FriendshipStatus = (int)FriendshipStatus.Friends;
 
-            friendsQuery1.FriendshipStatus = (int)FriendshipStatus.Friends;
-            friendsQuery2.FriendshipStatus = (int)FriendshipStatus.Friends;
+                _dbContext.Friends.Update(friendsQuery1);
+                _dbContext.Friends.Update(friendsQuery2);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                _dbContext.Friends.Remove(friendsQuery1);
+                _dbContext.Friends.Remove(friendsQuery2);
+                await _dbContext.SaveChangesAsync();
+            }
 
-            _dbContext.Friends.Update(friendsQuery1);
-            _dbContext.Friends.Update(friendsQuery2);
-            await _dbContext.SaveChangesAsync();
-
-            FriendDto friend = await _dbContext.Friends.Where(f => f.UserId == friendUserId && f.FriendUserId == userId)
-                .Select(f => new FriendDto()
-                {
-                    UserId = f.User.UserId,
-                    FriendNickname = f.User.Nickname,
-                    FriendImage = f.User.Image,
-                    FriendshipStatus = f.FriendshipStatus
-                }).FirstOrDefaultAsync();
+            FriendDto friend = new FriendDto();
+            if (accept)
+            {
+                friend = await _dbContext.Friends.Where(f => f.UserId == friendUserId && f.FriendUserId == userId)
+                    .Select(f => new FriendDto()
+                    {
+                        UserId = f.User.UserId,
+                        FriendNickname = f.User.Nickname,
+                        FriendImage = f.User.Image,
+                        FriendshipStatus = f.FriendshipStatus
+                    }).FirstOrDefaultAsync();
+            }
+            else
+            {
+                friend = await _dbContext.Users.Where(f => f.UserId == friendUserId)
+                    .Select(f => new FriendDto()
+                    {
+                        UserId = f.UserId,
+                        FriendNickname = f.Nickname,
+                        FriendImage = f.Image,
+                        FriendshipStatus = (int)FriendshipStatus.Declined
+                    }).FirstOrDefaultAsync();
+            }
 
             return friend;
         }

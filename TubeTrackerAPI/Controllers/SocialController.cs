@@ -34,11 +34,11 @@ namespace TubeTrackerAPI.Controllers
         //GET api/<SocialController>/getFriends?userId=1
         [Route("friends/getFriendsList")]
         [HttpGet]
-        public async Task<IActionResult> GetFriendsListAsync([FromQuery] int userId)
+        public async Task<IActionResult> GetFriendsListAsync([FromQuery] int userId, [FromQuery]bool suggestions)
         {
             SocialService socialService = new SocialService(this._dbContext);
 
-            return Ok(await socialService.GetFriendsList(userId));
+            return Ok(await socialService.GetFriendsList(userId, suggestions));
         }
 
         //GET api/<SocialController>/getFriendsWithMessagesList?userId=1
@@ -64,11 +64,11 @@ namespace TubeTrackerAPI.Controllers
         //POST api/<SocialController>/AcceptFriendship?userId=1&friendUserId=2
         [Route("friends/acceptFriendship")]
         [HttpPost]
-        public async Task<IActionResult> AcceptFriendshipAsync([FromQuery] int userId, [FromQuery] int friendUserId)
+        public async Task<IActionResult> AcceptFriendshipAsync([FromQuery] int userId, [FromQuery] int friendUserId, [FromQuery] bool accept)
         {
             SocialService socialService = new SocialService(this._dbContext);
 
-            return Ok(await socialService.AcceptFriendship(userId, friendUserId));
+            return Ok(await socialService.AcceptFriendship(userId, friendUserId, accept));
         }
 
         //POST api/<SocialController>/createMessage

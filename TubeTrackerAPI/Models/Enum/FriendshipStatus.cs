@@ -5,6 +5,7 @@
         Invited = 0,
         Friends = 1,
         NotFriends = 2,
-        Accept = 3
+        Accept = 3,
+        Declined = 4
     }
 }

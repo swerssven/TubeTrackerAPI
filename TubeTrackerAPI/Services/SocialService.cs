@@ -26,11 +26,11 @@ namespace TubeTrackerAPI.Services
             return searchFriendsResponse;
         }
 
-        internal async Task<IEnumerable<FriendDto>> GetFriendsList(int userId)
+        internal async Task<IEnumerable<FriendDto>> GetFriendsList(int userId, bool suggestions)
         {
             SocialRepository socialRepository = new SocialRepository(_dbContext);
 
-            IEnumerable<FriendDto> friendsResponse = await socialRepository.GetFriendsList(userId);
+            IEnumerable<FriendDto> friendsResponse = await socialRepository.GetFriendsList(userId, suggestions);
 
             return friendsResponse;
         }
@@ -53,11 +53,11 @@ namespace TubeTrackerAPI.Services
             return postsResponse;
         }
 
-        internal async Task<FriendDto> AcceptFriendship(int userId, int friendUserId)
+        internal async Task<FriendDto> AcceptFriendship(int userId, int friendUserId, bool accept)
         {
             SocialRepository socialRepository = new SocialRepository(_dbContext);
 
-            FriendDto postsResponse = await socialRepository.AcceptFriendship(userId, friendUserId);
+            FriendDto postsResponse = await socialRepository.AcceptFriendship(userId, friendUserId, accept);
 
             return postsResponse;
         }
