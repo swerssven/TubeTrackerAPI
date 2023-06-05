@@ -290,7 +290,8 @@ namespace TubeTrackerAPI.Repositories
                     UserId = m.UserId,
                     UserNickname = m.User.Nickname,
                     UserImage = m.User.Image,
-                    CreationDate = m.CreationDate
+                    CreationDate = m.CreationDate,
+                    Rating = _dbContext.SerieRatings.Where(x => x.UserId == m.UserId && x.SerieId == m.SerieId).Select(x => x.Rating).FirstOrDefault()
                 }).ToListAsync();
 
             serieReview.numReviews = await _dbContext.SerieReviews.CountAsync(m => m.SerieId == serieQuery.SerieId);

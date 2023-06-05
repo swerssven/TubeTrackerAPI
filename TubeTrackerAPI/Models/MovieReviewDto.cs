@@ -15,6 +15,8 @@
         public string Content { get; set; }
 
         public DateTime CreationDate { get; set; }
+
+        public int Rating { get; set; }
     }
 
     public class MovieReviewDto

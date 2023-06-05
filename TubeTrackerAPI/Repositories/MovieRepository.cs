@@ -213,7 +213,8 @@ namespace TubeTrackerAPI.Repositories
                     UserId = m.UserId,
                     UserNickname = m.User.Nickname,
                     UserImage = m.User.Image,
-                    CreationDate = m.CreationDate
+                    CreationDate = m.CreationDate,
+                    Rating = _dbContext.MovieRatings.Where(x => x.UserId == m.UserId && x.MovieId == m.MovieId).Select(x => x.Rating).FirstOrDefault()
                 }).ToListAsync();
 
             movieReviewDto.numReviews = await _dbContext.MovieReviews.CountAsync(m => m.MovieId == movieQuery.MovieId);
