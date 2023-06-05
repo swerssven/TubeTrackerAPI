@@ -72,6 +72,32 @@ namespace TubeTrackerAPI.Repositories
         {
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
+
+            var queryUserId = await _dbContext.Users.Where(x => x.Email == user.Email).Select(x => x.UserId).FirstOrDefaultAsync();
+            SocialService socialService = new SocialService(_dbContext);
+            await socialService.CreateFriendInvitation(queryUserId, 26); // Make friend invitation with Tube_Tracker
+            await socialService.AcceptFriendship(queryUserId, 26, true); // Accept friendship with Tube_tracker
+
+            if (user.Language == "es-ES")
+            {
+                string messageES = "<div><p>¡Bienvenido a Tube Tracker!</p><p>Únete a nosotros para rastrear tu contenido favorito, interactuar con otros fans y descubrir nuevas películas y series. Nunca te pierdas nada, comparte tus pensamientos y disfruta de una experiencia personalizada de televisión. ¡Prepárate para embarcarte en un emocionante viaje con Tube Tracker!</p><p>Bienvenido a bordo,<br />El equipo de Tube Tracker</p></div>";
+                await socialService.CreateMessage(new CreateMessageRequest()
+                {
+                    SenderUserId = 26, //tube tracker id
+                    ReceiverUserId = queryUserId,
+                    Content = messageES
+                });
+            }
+            else if (user.Language == "en-EN")
+            {
+                string messageES = "<div> <p>Welcome to Tube Tracker!</p> <p> Join us in tracking your favorite content, engaging with fellow fans, and discovering new movies and series. Never miss a beat, share your thoughts, and enjoy a personalized TV-watching experience. Get ready to embark on an exciting journey with Tube Tracker! </p> <p> Welcome aboard, <br /> The Tube Tracker Team </p> </div>";
+                await socialService.CreateMessage(new CreateMessageRequest()
+                {
+                    SenderUserId = 26, //tube tracker id
+                    ReceiverUserId = queryUserId,
+                    Content = messageES
+                });
+            }
         }
 
         internal async Task<bool> CheckUserEmail(int userId, string email)
@@ -295,6 +321,13 @@ namespace TubeTrackerAPI.Repositories
                 {
                     await socialService.deletePost(post);
                 }
+            }
+
+            // Remove from PostLikes table.
+            var queryPostLikes = await _dbContext.Users.Include(x => x.PostsNavigation).FirstOrDefaultAsync(p => p.UserId == userId);
+            if (queryPostLikes != null)
+            {
+                queryPostLikes.PostsNavigation.Clear();
             }
 
             // Remove from User table.

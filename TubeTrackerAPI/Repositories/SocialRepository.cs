@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using TubeTrackerAPI.Models;
 using TubeTrackerAPI.Models.Enum;
 using TubeTrackerAPI.Models.Request;
+using TubeTrackerAPI.Services;
 using TubeTrackerAPI.TubeTrackerContext;
 using TubeTrackerAPI.TubeTrackerEntities;
 
@@ -109,6 +110,33 @@ namespace TubeTrackerAPI.Repositories
             _dbContext.Friends.Add(invitation1);
             _dbContext.Friends.Add(invitation2);
             await _dbContext.SaveChangesAsync();
+
+            SocialService socialService = new SocialService(_dbContext);
+            var queryUser = await _dbContext.Users.Where(u => u.UserId == userId).Select(x => x.Nickname).FirstOrDefaultAsync();
+            var queryFriendLanguage = await _dbContext.Users.Where(u => u.UserId == friendUserId).Select(x => x.Language).FirstOrDefaultAsync();
+
+            if(queryFriendLanguage != null && queryFriendLanguage == "es-ES" && friendUserId != 26) //except tube tracker id
+            {
+                string messageES = "<div><p>¡Alerta de nuevo amigo en Tube Tracker! <b>{{friend}}</b> te ha invitado para sumergirte en aventuras televisivas compartidas. Ve a la sección de <a href=\"/social/find-friends\">Amigos</a> y ¡acepta ahora!</p></div>";
+                messageES = messageES.Replace("{{friend}}", queryUser);
+                await socialService.CreateMessage(new CreateMessageRequest()
+                {
+                    SenderUserId = 26, //tube tracker id
+                    ReceiverUserId = friendUserId,
+                    Content = messageES
+                });
+            }
+            else if(queryFriendLanguage != null && queryFriendLanguage == "en-EN" && friendUserId != 26) //except tube tracker id
+            {
+                string messageES = "<div> <p>New friend alert on Tube Tracker! <b>{{friend}}</b> invited you to embrace the connection and dive into shared TV adventures. Go to the <a href=\"/social/find-friends\">Friends</a> section and accept now!</p> </div>";
+                messageES = messageES.Replace("{{friend}}", queryUser);
+                await socialService.CreateMessage(new CreateMessageRequest()
+                {
+                    SenderUserId = 26, //tube tracker id
+                    ReceiverUserId = friendUserId,
+                    Content = messageES
+                });
+            }
 
             FriendDto friend = await _dbContext.Friends.Where(f => f.UserId == userId && f.FriendUserId == friendUserId)
                 .Select(f => new FriendDto()
