@@ -72,13 +72,13 @@ namespace TubeTrackerAPI.Repositories
 
             foreach (var m in popularMovies)
             {
-                DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
-                string formattedDate = date.ToString("yyyy-MM-dd");
+                //DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
+                //string formattedDate = date.ToString("yyyy-MM-dd");
                 ExternalMovie externalMovie = new ExternalMovie()
                 {
                     id = m.MovieApiId,
                     title = (m.TitleEn != null ? m.TitleEn : m.TitleEs),
-                    release_date = formattedDate,
+                    release_date = (m.PremiereDate).ToString(),
                     poster_path = m.Poster,
                     backdrop_path = m.Backdrop
                 };
@@ -109,13 +109,13 @@ namespace TubeTrackerAPI.Repositories
 
             foreach (var m in topRatedMovies)
             {
-                DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
-                string formattedDate = date.ToString("yyyy-MM-dd");
+                //DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
+                //string formattedDate = date.ToString("yyyy-MM-dd");
                 ExternalMovie externalMovie = new ExternalMovie()
                 {
                     id = m.MovieApiId,
                     title = (m.TitleEn != null ? m.TitleEn : m.TitleEs),
-                    release_date = formattedDate,
+                    release_date = (m.PremiereDate).ToString(),
                     poster_path = m.Poster,
                     backdrop_path = m.Backdrop
                 };
@@ -307,7 +307,8 @@ namespace TubeTrackerAPI.Repositories
 
             if (!RatingQuery.IsNullOrEmpty())
             {
-                ratingsDto.AverageRating = RatingQuery.Average(r => r.Rating);
+                string formattedNumber = (RatingQuery.Average(r => r.Rating)).ToString("F1");
+                ratingsDto.AverageRating = double.Parse(formattedNumber);
                 var tmp = RatingQuery.FirstOrDefault(r => r.UserId == userId);
 
                 if (tmp != null)
@@ -553,8 +554,8 @@ namespace TubeTrackerAPI.Repositories
             foreach (var movie in watchedMovieList)
             {
                 await checkWatchedAndFavoriteMovie(movie, userId);
-                movie.DateAddedFavorite = await _dbContext.FavoriteMovies.Where(f => f.UserId == userId && f.MovieId == movie.id).
-                    Select(s => s.DateAdded).FirstOrDefaultAsync();
+                movie.DateAddedFavorite = await _dbContext.WatchedMovies.Where(f => f.UserId == userId && f.MovieId == movie.id).
+                    Select(s => s.DateWatched).FirstOrDefaultAsync();
             }
 
             return watchedMovieList;

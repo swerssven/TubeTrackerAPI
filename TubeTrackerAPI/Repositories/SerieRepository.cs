@@ -68,13 +68,11 @@ namespace TubeTrackerAPI.Repositories
 
             foreach (var m in popularSeries)
             {
-                DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
-                string formattedDate = date.ToString("yyyy-MM-dd");
                 ExternalSerie externalSerie = new ExternalSerie()
                 {
                     id = m.SerieApiId,
                     name = (m.TitleEn != null ? m.TitleEn : m.TitleEs),
-                    first_air_date = formattedDate,
+                    first_air_date = (m.PremiereDate).ToString(),
                     poster_path = m.Poster,
                     backdrop_path = m.Backdrop
                 };
@@ -105,13 +103,11 @@ namespace TubeTrackerAPI.Repositories
 
             foreach (var m in topRatedSeries)
             {
-                DateTime date = DateTime.ParseExact(m.PremiereDate.ToString(), "dd/MM/yyyy H:mm:ss", CultureInfo.InvariantCulture);
-                string formattedDate = date.ToString("yyyy-MM-dd");
                 ExternalSerie externalSerie = new ExternalSerie()
                 {
                     id = m.SerieApiId,
                     name = (m.TitleEn != null ? m.TitleEn : m.TitleEs),
-                    first_air_date = formattedDate,
+                    first_air_date = (m.PremiereDate).ToString(),
                     poster_path = m.Poster,
                     backdrop_path = m.Backdrop
                 };
@@ -384,7 +380,8 @@ namespace TubeTrackerAPI.Repositories
 
             if (!RatingQuery.IsNullOrEmpty())
             {
-                ratingsDto.AverageRating = RatingQuery.Average(r => r.Rating);
+                string formattedNumber = (RatingQuery.Average(r => r.Rating)).ToString("F1");
+                ratingsDto.AverageRating = double.Parse(formattedNumber);
                 var tmp = RatingQuery.FirstOrDefault(r => r.UserId == userId);
 
                 if (tmp != null)
